@@ -12,7 +12,7 @@ SECTION MBR vstart=0x7c00
   mov sp, 0x7c00 ; mbr stack address
   mov ax, 0xb800 ; graphics port address
                  ; 0xb8000/16 = 0xb800 >>
-  mov gs, ax 
+  mov gs, ax
 ;---------------------------------------------------------------------------
 ;clear screen
 ;use bios INT 0x10 (bochx86->little-endian)
