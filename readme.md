@@ -10,3 +10,11 @@
 <hr>
 有意思的东西, 想法, 好好笑. 自己喜欢做什么就好, 何必绞尽脑汁去思考.
 <hr>
+
+## Change logs
+### uiharuOS0_0_0_0_1.iso
+
++ MBR
++ loader
+
+![](http://7xj431.com1.z0.glb.clouddn.com/屏幕快照 2016-11-02 下午4.50.30.png)
