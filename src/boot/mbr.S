@@ -2,7 +2,7 @@
 ;---------------------------------------------------------------------------
 ; nasm编译器中的预处理指令, 在编译器编译前, 包含boot.inc文件
 %include "boot.inc"
-SECTION MBR vstart=0x7c00
+SECTION MBR vstart=0x7c00 ; bios会把mbr加载到0x7c00处, 所以从0x7c00处开始
   mov ax, cs
   mov ds, ax
   mov es, ax
@@ -10,7 +10,7 @@ SECTION MBR vstart=0x7c00
   mov fs, ax
   mov sp, 0x7c00 ; 栈指针寄存器指向0x7c00, 作为MBR栈
   mov ax, 0xb800 ; 显卡寄存器地址0xb8000, 实模式寻址, 段基址: 0xb800
-  mov gs, ax
+  mov gs, ax     ; 显卡
 ;---------------------------------------------------------------------------
 ; 清屏操作
 ; INT 0x10  功能号: 0x06  功能描述: 上卷窗口
@@ -117,5 +117,5 @@ rd_disk_m_16:
     loop .go_on_read; 循环
     ret             ; 函数返回, call函数的时候会将返回地址压入栈中
 
-times (512-2)-($-$$) db 0
-db 0x55, 0xaa
+times (512-2)-($-$$) db 0 ; 填充0, 保证第一个扇区510字节
+db 0x55, 0xaa       ; db:(define byte), 最后2位0xaa55
