@@ -21,7 +21,7 @@ SELECTOR_VIDEO equ (0x0003<<3)+ TI_GDT + RPL0
 ; 以下是gdt的指针, 前2字节是gdt界限, 后4字节是gdt起始地址
 gdt_ptr dw GDT_LIMIT
         dd GDT_BASE
-loadermsg db '2 loader in real.'
+loadermsg db 'Hello UiharuOS!'
 
 loader_start:
 ;-------------------------------------------------------
@@ -29,10 +29,10 @@ loader_start:
 ;-------------------------------------------------------
 mov sp, LOADER_BASE_ADDR
 mov bp, loadermsg
-mov cx, 17
+mov cx, 15
 mov ax, 0x1301
 mov bx, 0x001f
-mov dx, 0x0C1E
+mov dx, 0x0C1F
 int 0x10
 
 ; 准备进入保护模式
