@@ -26,22 +26,22 @@ SECTION MBR vstart=0x7c00 ; bios会把mbr加载到0x7c00处, 所以从0x7c00处�
 
 ; PRINT BG-COLOR GREEN, FR-COLOR RED, FLASH STRING "UIHARU"
 ;---------------------------------------------------------------------------
-mov byte [gs:0x00], 'U'
+mov byte [gs:0x00], '3'
 mov byte [gs:0x01], 0xA4
 
-mov byte [gs:0x02], 'i'
+mov byte [gs:0x02], '2'
 mov byte [gs:0x03], 0xA4
 
-mov byte [gs:0x04], 'h'
+mov byte [gs:0x04], 'b'
 mov byte [gs:0x05], 0xA4
 
-mov byte [gs:0x06], 'a'
+mov byte [gs:0x06], 'i'
 mov byte [gs:0x07], 0xA4
 
-mov byte [gs:0x08], 'r'
+mov byte [gs:0x08], 't'
 mov byte [gs:0x09], 0xA4
 
-mov byte [gs:0x0A], 'u'
+mov byte [gs:0x0A], ' '
 mov byte [gs:0x0B], 0xA4
 
 mov eax, LOADER_START_SECTOR    ; loader在硬盘上的LBA地址: 0x2, 第二块扇区
