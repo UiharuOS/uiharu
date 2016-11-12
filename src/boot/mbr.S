@@ -46,7 +46,8 @@ mov byte [gs:0x0B], 0xA4
 
 mov eax, LOADER_START_SECTOR    ; loader在硬盘上的LBA地址: 0x2, 第二块扇区
 mov bx, LOADER_BASE_ADDR        ; loader在内存中的位置: 0x900
-mov cx, 1                       ; 待读入的扇区数
+;mov cx, 1                       ; 待读入的扇区数
+mov cx, 4
 call rd_disk_m_16               ; call调用函数: 从磁盘中读加载器到内存
 
 jmp LOADER_BASE_ADDR            ; 跳转访问加载器(栈)

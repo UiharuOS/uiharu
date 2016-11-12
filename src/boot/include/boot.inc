@@ -2,3 +2,45 @@
 ; ----------------- loader & kernel -----------------
 LOADER_BASE_ADDR equ 0x900  ; 加载器配置宏
 LOADER_START_SECTOR equ 0x2 ; 加载器配置宏
+
+; ----------------- gdt descriptor ------------------
+DESC_G_4K equ 1_00000000000000000000000b ; 段描述符G位设定4K精度, 访问范围0~4G ⚡️ 23
+DESC_D_32 equ 1_0000000000000000000b     ; 段描述符D位设定操作数32位           ⚡️ 22
+DESC_L    equ 0000000000000000000000b    ; 段描述符L位设定, 置为0表示32位CPU   ⚡️ 21
+DESC_AVL  equ 0000000000000000000000b    ; CPU不用此位, 暂时置为0              ⚡️ 20
+DESC_LIMIT_CODE2  equ 1111_0000000000000000b ;                                 ⚡️ 19~16
+DESC_LIMIT_DATA2  equ DESC_LIMIT_CODE2       ;                                 ⚡️ 19~16
+DESC_LIMIT_VIDEO2 equ  0000_000000000000000b ;                                 ⚡️ 19~16
+DESC_P    equ      1_000000000000000b ; CPU检查段在内存中                      ⚡️ 15
+DESC_DPL_0 equ 00_0000000000000b ; 0特权级                                     ⚡️ 14
+DESC_DPL_1 equ 01_0000000000000b ; 1特权级                                     ⚡️ 14~13
+DESC_DPL_2 equ 10_0000000000000b ; 2特权级                                     ⚡️ 14~13
+DESC_DPL_3 equ 11_0000000000000b ; 3特权级                                     ⚡️ 14~13
+DESC_S_CODE     equ 1_000000000000b ; 非系统段~代码段                          ⚡️ 12
+DESC_S_DATA     equ DESC_S_CODE     ; 非系统段~数据段                          ⚡️ 12
+DESC_S_sys      equ 0_000000000000b ; 系统段                                   ⚡️ 12
+DESC_TYPE_CODE  equ 1000_00000000b
+; 代码段 可执行 非一致性 不可读 已访问位a清0                                   ⚡️ 11~8
+DESC_TYPE_DATA  equ 0010_00000000b
+; 数据段 不可执行 向上扩展 可写 已访问位a清0                                   ⚡️ 11~8
+; 代码段的高4字节
+DESC_CODE_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + \
+                                   DESC_L + DESC_AVL + DESC_LIMIT_CODE2 + \
+                                   DESC_P + DESC_DPL_0 + DESC_S_CODE + \
+                                   DESC_TYPE_CODE + 0x00                       ⚡️ 7~0
+DESC_DATA_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + \
+                                   DESC_L + DESC_AVL + DESC_LIMIT_DATA2 + \
+                                   DESC_P + DESC_DPL_0 + DESC_S_DATA + \
+                                   DESC_TYPE_DATA + 0x00                       ⚡️ 7~0
+DESC_VIDEO_HIGH4 equ (0x00 << 24)+ DESC_G_4K + DESC_D_32 + \
+                                   DESC_L + DESC_AVL + DESC_LIMIT_VIDEO2 + \
+                                   DESC_P + DESC_DPL_0 + DESC_S_DATA + DESC_TYPE_DATA + \
+                                   0x00                                        ⚡️ 7~0
+
+; ----------- selector -----------
+RPL0 equ 00b
+RPL1 equ 01b
+RPL2 equ 10b
+RPL3 equ 11b
+TI_GDT equ 000b
+TI_LDT equ 100b
