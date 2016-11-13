@@ -9,8 +9,8 @@
 ## BootLoader
 + **homebrew**
 
-    0xf000:fff0 -> 0xe05b -> bios -> (bs=512 seek=1 0xaa55)⚡️ mbr -> (硬盘)loader ---> kernel
-    \_________________________ 实模式 _________________________/\_ 打开A20Gate;加载GDT;置cr0 pe位为1 进入保护模式_/
+    0xf000:fff0->0xe05b->bios->(bs=512 seek=1 0xaa55)⚡️ mbr->(硬盘)loader ---> kernel
+    \_______________________ 实模式 _______________________/\_ 打开A20Gate;加载GDT;置cr0 pe位为1 进入保护模式_/
 
 + **grub**
     - 再说:)
