@@ -16,20 +16,19 @@ SECTION MBR vstart=0x7c00 ; bios会把mbr加载到0x7c00处, 所以从0x7c00处�
 ; INT 0x10  功能号: 0x06  功能描述: 上卷窗口
 ;---------------------------------------------------------------------------
   mov ax, 0x600  ; bios 0x10中断的功能号
-  mov bx, 0x700
   mov cx, 0      ; 左上角: (0, 0)
   mov dx, 0x184f ; VGA[文本模式]中, 一行容纳80个字符, 共25行
                  ; 下标从0开始, 0x18=24, 0x4f=79
                  ; 由于x86CPU是[小端模式] -> 0x184f
-
+                 ; 左上->右下: clear screen
   int 0x10       ; 使用INT 0x10
 
-; PRINT BG-COLOR GREEN, FR-COLOR RED, FLASH STRING "UIHARU"
+; PRINT BG-COLOR GREEN, FR-COLOR RED, FLASH STRING "16bit"
 ;---------------------------------------------------------------------------
-mov byte [gs:0x00], '3'
+mov byte [gs:0x00], '1'
 mov byte [gs:0x01], 0xA4
 
-mov byte [gs:0x02], '2'
+mov byte [gs:0x02], '6'
 mov byte [gs:0x03], 0xA4
 
 mov byte [gs:0x04], 'b'
@@ -45,16 +44,16 @@ mov byte [gs:0x0A], ' '
 mov byte [gs:0x0B], 0xA4
 
 mov eax, LOADER_START_SECTOR    ; loader在硬盘上的LBA地址: 0x2, 第二块扇区
+                                ; 66B802000000(0x66操作数反转前缀)
 mov bx, LOADER_BASE_ADDR        ; loader在内存中的位置: 0x900
-;mov cx, 1                       ; 待读入的扇区数
-mov cx, 4
+mov cx, 4                       ; 待读入的扇区数
 call rd_disk_m_16               ; call调用函数: 从磁盘中读加载器到内存
 
 jmp LOADER_BASE_ADDR            ; 跳转访问加载器(栈)
 
 ; 函数: rd_disk_m_16
 ; -> 功能: 读取硬盘的n个扇区
-; --> eax: LBA的扇区号
+; --> eax: 加载器的LBA扇区号
 ; --> bx:  将数据写入的内存地址
 ; --> cx:  读入的扇区数
 ;---------------------------------------------------------------------------
@@ -63,8 +62,8 @@ rd_disk_m_16:
     mov di, cx      ; 备份cx
 ; 读写硬盘:
 ; 设置要读取的扇区数
-    mov dx, 0x1f2
-    mov al, cl      ; 为什么使用cl寄存器?
+    mov dx, 0x1f2   ; 0x1f2: primary通道, sector count寄存器
+    mov al, cl      ; cl: the least significant 8 bits of the cx
     out dx, al      ; 读取的扇区数
 
     mov eax, esi    ; 恢复eax
@@ -93,7 +92,7 @@ rd_disk_m_16:
 
     mov dx, 0x1f7   ; 初始化状态寄存器~
     mov al, 0x20    ; 00100000~ DRDY: 设备就绪等待指令
-    out dx, al
+    out dx, al      ; 写操作, command寄存器, 硬盘开始工作
 
 ; 检测硬盘状态: BSY位
   .not_ready:
@@ -105,14 +104,16 @@ rd_disk_m_16:
 
 ; 从0x1f0端口(primary通道的data寄存器)读数据
     mov ax, di      ; di<-cx<-待读入的扇区数
-    mov dx, 256     ; (cx*512)/2<-一次in读取2个字节: in操作的次数
+    mov dx, 256     ; (512)/2<-一次in读取2个字节: 每个扇区in操作的次数
     mul dx          ; 乘法操作, dx是操作数, 另一个操作数隐含在ax或al寄存器中
-    mov cx, ax      ; 将ax的低16位移入cx中, 作为循环计数
+                    ; -> [待读入的扇区数*每个扇区in操作的次数] = 4*256 = 1024
+                    ; -> 16位乘法32位乘积的低16位在ax寄存器, 高16位在dx寄存器
+    mov cx, ax      ; -> 💻 
 
     mov dx, 0x1f0   ; 访问0x1f0寄存器读取数据
 
   .go_on_read:
-    in ax, dx
+    in ax, dx       ; 从Primary通道主盘读数据
     mov [bx], ax    ; 把加载器写入内存: bx存放加载器所在的内存地址: 0x900
     add bx, 2       ; 移动2个字节
     loop .go_on_read; 循环
