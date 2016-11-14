@@ -1,7 +1,7 @@
 ; 配置文件
 ; ----------------- loader & kernel -----------------
-LOADER_BASE_ADDR equ 0x900  ; 加载器配置宏
-LOADER_START_SECTOR equ 0x2 ; 加载器配置宏
+LOADER_BASE_ADDR equ 0x900  ; 加载器被加载至内存中的地址
+LOADER_START_SECTOR equ 0x2 ; 加载器起始扇区(硬盘的第二个扇区)
 
 ; ----------------- gdt descriptor ------------------
 DESC_G_4K equ 1_00000000000000000000000b ; 段描述符G位设定4K精度, 访问范围0~4G ⚡️ 23
@@ -27,15 +27,15 @@ DESC_TYPE_DATA  equ 0010_00000000b
 DESC_CODE_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + \
                                    DESC_L + DESC_AVL + DESC_LIMIT_CODE2 + \
                                    DESC_P + DESC_DPL_0 + DESC_S_CODE + \
-                                   DESC_TYPE_CODE + 0x00;                      ⚡️ 7~0
+                                   DESC_TYPE_CODE + 0x00;                      ⚡️ 24~31
 DESC_DATA_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + \
                                    DESC_L + DESC_AVL + DESC_LIMIT_DATA2 + \
                                    DESC_P + DESC_DPL_0 + DESC_S_DATA + \
-                                   DESC_TYPE_DATA + 0x00;                      ⚡️ 7~0
+                                   DESC_TYPE_DATA + 0x00;                      ⚡️ 24~31
 DESC_VIDEO_HIGH4 equ (0x00 << 24)+ DESC_G_4K + DESC_D_32 + \
                                    DESC_L + DESC_AVL + DESC_LIMIT_VIDEO2 + \
                                    DESC_P + DESC_DPL_0 + DESC_S_DATA + DESC_TYPE_DATA + \
-                                   0x00;                                       ⚡️ 7~0
+                                   0x00;                                       ⚡️ 24~31
 
 ; ----------- selector -----------
 RPL0 equ 00b

@@ -5,20 +5,21 @@ jmp loader_start
 
 ; 构建gdt及其内部描述符
 GDT_BASE: dd 0x00000000
-          dd 0x00000000
-CODE_BASE: dd 0x0000FFFF
-           dd DESC_CODE_HIGH4
+          dd 0x00000000  ; GDT定义从0开始
+CODE_DESC: dd 0x0000FFFF ; 段界限0xFFFF 0~15位, 段基址的0~15位, 平坦模式段基址都是0
+           dd DESC_CODE_HIGH4 ; 段描述符的高32位
 DATA_STACK_DESC: dd 0x0000FFFF
                  dd DESC_DATA_HIGH4
-VIDEO_DESC: dd 0x80000007 ; limit=(0xbffff-0xb8000)/4k=0x7
+VIDEO_DESC: dd 0x80000007 ; 0xb800 + limit=(0xbffff-0xb8000)/4k=0x7
             dd DESC_VIDEO_HIGH4
 GDT_SIZE equ $ - GDT_BASE
 GDT_LIMIT equ GDT_SIZE - 1
-times 60 dq 0  ; 此处预留60个描述符空位
+times 60 dq 0  ; 此处预留60个描述符空位, 先用0占位
 SELECTOR_CODE equ (0x0001<<3) + TI_GDT + RPL0
 SELECTOR_DATA equ (0x0002<<3) + TI_GDT + RPL0
 SELECTOR_VIDEO equ (0x0003<<3)+ TI_GDT + RPL0
 ; 以下是gdt的指针, 前2字节是gdt界限, 后4字节是gdt起始地址
+; lgdt 48位操作数(6个字节)
 gdt_ptr dw GDT_LIMIT
         dd GDT_BASE
 loadermsg db 'Hello UiharuOS!'
@@ -62,7 +63,5 @@ p_mode_start:
     mov esp, LOADER_STACK_TOP
     mov ax, SELECTOR_VIDEO
     mov gs, ax
-
-    ; mov byte [gs:160], 'P'
 
 jmp $
