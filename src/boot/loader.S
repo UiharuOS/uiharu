@@ -47,7 +47,7 @@ loader_start:
 ; eax=0000E820h, edx=534D4150h ('SMAP')
     xor ebx, ebx         ; 自异或, 第一次调用时, ebx的值为0
                          ; 随后每次返回, CPU会重置ebx的值
-    mov edx, 0x534d4150h ; ASCII code for 'SMAP', 固定签名:
+    mov edx, 0x534d4150  ; ASCII code for 'SMAP', 固定签名:
                          ; BIOS将调用者正在请求的内存信息写入es:di寄存器
                          ; 所指向的ARDS缓冲区, 再用此签名校验其中的信息
     mov di, ards_buf     ; es:di指向ARDS结构缓冲区, es在mbr中已经赋值
