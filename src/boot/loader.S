@@ -98,8 +98,8 @@ loader_start:
     mov cx, 0x400 ;(1KB)
     mul cx ; 16位乘法, 乘数是AX寄存器. 积为32位, 高16位在DX寄存器, 低16位在AX寄存器中
            ; 计算返回的15MB以下内存容量AX*1KB
-    and eax, 0x0000FFFF ; clear upper bits of eax
     shl edx, 16         ; edx左移16位: 空出edx低端16位
+    and eax, 0x0000FFFF ; clear upper bits of eax
     or edx, eax         ; edx与eax做与运算得到完整的32位积=>15MB以下内存字节容量至edx
     add edx, 0x100000   ; ax只是15MB, 加1MB
     mov esi, edx        ; 先把低15MB的内存容量存入esi寄存器备份
@@ -133,9 +133,6 @@ loader_start:
 .mem_get_ok:
     mov [total_mem_bytes], edx  ; 以byte为单位的内存总量
 
-.error_hlt:
-    hlt  ; 出错则挂起
-
 ;-------------------------------------------------------
 ; bios 0x10中断 打印字符串
 ;-------------------------------------------------------
@@ -164,6 +161,9 @@ loader_start:
     mov cr0, eax
     
 jmp dword SELECTOR_CODE:p_mode_start  ; 刷新流水线
+
+.error_hlt:
+    hlt  ; 出错则挂起
 
 [bits 32]
 p_mode_start:
