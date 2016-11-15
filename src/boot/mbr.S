@@ -49,7 +49,8 @@ mov bx, LOADER_BASE_ADDR        ; loader在内存中的位置: 0x900
 mov cx, 4                       ; 待读入的扇区数
 call rd_disk_m_16               ; call调用函数: 从磁盘中读加载器到内存
 
-jmp LOADER_BASE_ADDR            ; 跳转访问加载器(栈)
+; jmp LOADER_BASE_ADDR          ; 跳转访问加载器(栈)
+jmp LOADER_BASE_ADDR + 0x300
 
 ; 函数: rd_disk_m_16
 ; -> 功能: 读取硬盘的n个扇区

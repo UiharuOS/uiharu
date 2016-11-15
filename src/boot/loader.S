@@ -1,7 +1,7 @@
 %include "boot.inc"
 section loader vstart=LOADER_BASE_ADDR
 LOADER_STACK_TOP equ LOADER_BASE_ADDR
-jmp loader_start
+; jmp loader_start
 
 ; 构建gdt及其内部描述符
 GDT_BASE: dd 0x00000000
@@ -18,40 +18,147 @@ times 60 dq 0  ; 此处预留60个描述符空位, 先用0占位
 SELECTOR_CODE equ (0x0001<<3) + TI_GDT + RPL0
 SELECTOR_DATA equ (0x0002<<3) + TI_GDT + RPL0
 SELECTOR_VIDEO equ (0x0003<<3)+ TI_GDT + RPL0
+; 保存检测出来的内存大小
+; 当前偏移文件头(60+4)*8byte=512=0x200字节
+; loader被加载进内存的地址是0x900
+; 所以total_mem_bytes在内存中的地址是0xb00
+total_mem_bytes dd 0  ; dd=>define double word(双字), 4字节大小变量
+                      ; 32位地址总线最大内存4G=4*1024*1024*1024=4294967296
+                      ; 4字节大小变量可以表示: 2^32=4294967296 --> 正好:)
 ; 以下是gdt的指针, 前2字节是gdt界限, 后4字节是gdt起始地址
 ; lgdt 48位操作数(6个字节)
 gdt_ptr dw GDT_LIMIT
         dd GDT_BASE
 loadermsg db 'Hello UiharuOS!'
 
+; 人工对齐: 
+; 定义缓冲区, 存储BIOS 0x15中断0xe820子功能返回的ARDS结构
+; 每执行该中断一次便会得到一个ARDS结构的数据,放入缓冲区中
+; 以便后续遍历
+ards_buf times 244 db 0  ; ards_buf指向内存缓冲区地址,大小是244
+                         ; 一个ARDS结构体是20字节, 可以容纳12个ARDS结构
+ards_nr dw 0 ; 用于记录ARDS结构体的数量=>2字节
+
+; 文件内偏移地址: 0xb00 + (4+6+244+2) = 0x200 + 0x100 = 0x300
 loader_start:
+;-------------------------------------------------------
+; bios 0x15中断 e820子功能 获取物理内存布局
+;-------------------------------------------------------
+; eax=0000E820h, edx=534D4150h ('SMAP')
+    xor ebx, ebx         ; 自异或, 第一次调用时, ebx的值为0
+                         ; 随后每次返回, CPU会重置ebx的值
+    mov edx, 0x534d4150h ; ASCII code for 'SMAP', 固定签名:
+                         ; BIOS将调用者正在请求的内存信息写入es:di寄存器
+                         ; 所指向的ARDS缓冲区, 再用此签名校验其中的信息
+    mov di, ards_buf     ; es:di指向ARDS结构缓冲区, es在mbr中已经赋值
+.e820_mem_get_loop:      ; 循环获取每个ARDS返回的内存描述符结构
+                         ; e820子功能返回ARDS是迭代式的
+                         ; 直到EBX寄存器为0, 且CF位为0
+    mov eax, 0x0000e820  ; bios0x15中断功能号
+                         ; 执行int 15h后, eax的值会变成ascii('SMAP')
+                         ; 每次调用中断前都要更新为子功能号
+    mov ecx, 20          ; ARDS结构的字节大小: 4(字节)*5(表项)=20字节
+
+    int 0x15             ; 调用bios0x15中断,子功能:e820h
+    jc .e820_failed_so_try_e801  ; 判断CF、跳转: 0未出错, 1出错
+    add di, cx           ; 增加di20字节指向新的ARDS结构位置
+    inc word [ards_nr]   ; 增加ARDS结构体的数量
+    cmp ebx, 0           ; 若ebx=0, CF!=1, 说明已是最后一个ARDS
+    jnz .e820_mem_get_loop
+; 在所有ards结构中
+; 因为32位地址总线, 只要低32位就行了
+; 找出(BaseAddLow+LengthLow)的最大值, 即最大物理内存容量
+    mov cx, [ards_nr]    ; cx作为循环变量(ards的个数)
+    mov ebx, ards_buf    ; ebx指向ards缓冲区的起始地址
+    xor edx, edx         ; edx为最大内存容量, 初始置0
+.find_max_mem_area:      ; 循环累加, 冒泡排序求最大
+; 无需判断type是否为1, 最大的内存块一定是可以被使用的
+    mov eax, [ebx]       ; BaseAddLow: 第1个表项:32位
+    add eax, [ebx+8]     ; LengthLow: 第3个表项: 32位
+    add ebx, 20          ; 指向缓冲区中下一个ARDS结构
+    cmp edx, eax
+; 冒泡排序, 找出最大内存容量放在edx寄存器中
+    jge .next_ards
+    mov edx, eax         ; edx<eax, 将当前的(BaseAddLow+LengthLow)给edx
+                         ; edx即为最大物理内存容量
+.next_ards:
+    loop .find_max_mem_area
+    jmp .mem_get_ok      ; 查找成功
+;-------------------------------------------------------
+; bios 0x15中断 e801子功能 获取物理内存布局 最大4G
+;-------------------------------------------------------
+; 返回后, ax,cx值一样, 以KB为单位; bx,dx值一样,以64KB为单位
+; ax,cx寄存器中为低16MB(⚠ memory hole), bx,dx寄存器中为16MB~4GB
+.e820_failed_so_try_e801:
+    mov ax, 0xe801
+    int 0x15
+    jc .e801_failed_so_try88  ; carray flag: 0未出错, 1出错
+; 先算出低15MB内存
+; ax和cx是KB为单位->转换成byte为单位
+    mov cx, 0x400 ;(1KB)
+    mul cx ; 16位乘法, 乘数是AX寄存器. 积为32位, 高16位在DX寄存器, 低16位在AX寄存器中
+           ; 计算返回的15MB以下内存容量AX*1KB
+    and eax, 0x0000FFFF ; clear upper bits of eax
+    shl edx, 16         ; edx左移16位: 空出edx低端16位
+    or edx, eax         ; edx与eax做与运算得到完整的32位积=>15MB以下内存字节容量至edx
+    add edx, 0x100000   ; ax只是15MB, 加1MB
+    mov esi, edx        ; 先把低15MB的内存容量存入esi寄存器备份
+; 再将16MB以上内存转化为以byte为单位
+; 寄存器bx, dx中是以64KB为单位的内存数量
+    xor eax, eax      ; eax清0
+    mov ax, bx
+    mov ecx, 0x10000  ; 0x10000 64KB
+    mul ecx           ; 32位乘法
+                      ; 默认的被乘数是eax, 积为64KB
+                      ; 高32位存入edx, 低32位存入eax
+    add esi, eax      ; 低32位足够了, 最大支持4GB
+    mov edx, esi      ; edx为总内存大小: 低15+高16~4G+1MB(memory hole)
+    jmp .mem_get_ok
+;-------------------------------------------------------
+; bios 0x15中断 0x88子功能 获取内存布局 只能获取64MB之内
+;-------------------------------------------------------
+.e801_failed_so_try88:
+    mov ah, 0x88        ; 0x88号子功能
+    int 0x15            ; 调用bios0x15中断
+    jc .error_hlt       ; 出错了, 就挂起机器
+    and eax, 0x0000FFFF
+
+    ; 16位乘法: 被乘数是ax, 积为32位, 高16位在dx中, 低16位在ax中
+    mov cx, 0x400 ;(1KB)
+    mul cx
+    shl edx, 16
+    or edx, eax
+    add edx, 0x100000   ; 0x88号子功能只会返回1MB以上的内存
+                        ; 所以实际内存大小加上1MB
+.mem_get_ok:
+    mov [total_mem_bytes], edx  ; 以byte为单位的内存总量
 ;-------------------------------------------------------
 ; bios 0x10中断 打印字符串
 ;-------------------------------------------------------
-mov sp, LOADER_BASE_ADDR
-mov bp, loadermsg
-mov cx, 15
-mov ax, 0x1301
-mov bx, 0x001f
-mov dx, 0x0C1F
-int 0x10
-
+    mov sp, LOADER_BASE_ADDR
+    mov bp, loadermsg
+    mov cx, 15
+    mov ax, 0x1301
+    mov bx, 0x001f
+    mov dx, 0x0C1F
+    int 0x10
+;-------------------------------------------------------
 ; 准备进入保护模式
 ; -> 1 打开A20
 ; -> 2 加载gdt
 ; -> 3 将cr0的pe位置为1
-
-; 1 打开A20地址总线
-in al, 0x92
-or al, 0000_0010b
-out 0x92, al
-; 2 加载gdt
-lgdt [gdt_ptr]
-; 3 将cr0的pe位置为1
-mov eax, cr0
-or eax, 0x00000001
-mov cr0, eax
-
+;-------------------------------------------------------
+    ; 1 打开A20地址总线
+    in al, 0x92
+    or al, 0000_0010b
+    out 0x92, al
+    ; 2 加载gdt
+    lgdt [gdt_ptr]
+    ; 3 将cr0的pe位置为1
+    mov eax, cr0
+    or eax, 0x00000001
+    mov cr0, eax
+    
 jmp dword SELECTOR_CODE:p_mode_start  ; 刷新流水线
 
 [bits 32]
