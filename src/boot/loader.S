@@ -29,7 +29,7 @@ total_mem_bytes dd 0  ; dd=>define double word(双字), 4字节大小变量
 ; lgdt 48位操作数(6个字节)
 gdt_ptr dw GDT_LIMIT
         dd GDT_BASE
-loadermsg db 'Hello UiharuOS!'
+; loadermsg db 'Hello UiharuOS!'
 
 ; 人工对齐: 
 ; 定义缓冲区, 存储BIOS 0x15中断0xe820子功能返回的ARDS结构
@@ -37,7 +37,7 @@ loadermsg db 'Hello UiharuOS!'
 ; 以便后续遍历
 ards_buf times 244 db 0  ; ards_buf指向内存缓冲区地址,大小是244
                          ; 一个ARDS结构体是20字节, 可以容纳12个ARDS结构
-ards_nr dw 0 ; 用于记录ARDS结构体的数量=>2字节
+ards_nr dw 0 ; 用于记录ARDS结构体的数量==>2字节
 
 ; 文件内偏移地址: 0xb00 + (4+6+244+2) = 0x200 + 0x100 = 0x300
 loader_start:
@@ -136,13 +136,13 @@ loader_start:
 ;-------------------------------------------------------
 ; bios 0x10中断 打印字符串
 ;-------------------------------------------------------
-    mov sp, LOADER_BASE_ADDR
-    mov bp, loadermsg
-    mov cx, 15
-    mov ax, 0x1301
-    mov bx, 0x001f
-    mov dx, 0x0C1F
-    int 0x10
+    ; mov sp, LOADER_BASE_ADDR
+    ; mov bp, loadermsg
+    ; mov cx, 15
+    ; mov ax, 0x1301
+    ; mov bx, 0x001f
+    ; mov dx, 0x0C1F
+    ; int 0x10
 ;-------------------------------------------------------
 ; 准备进入保护模式
 ; -> 1 打开A20
@@ -174,5 +174,7 @@ p_mode_start:
     mov esp, LOADER_STACK_TOP
     mov ax, SELECTOR_VIDEO
     mov gs, ax
+
+    ;mov byte [gs:160], 'P'
 
 jmp $
