@@ -1,7 +1,8 @@
 ; 配置文件
 ; ----------------- loader & kernel -----------------
-LOADER_BASE_ADDR equ 0x900  ; 加载器被加载至内存中的地址
-LOADER_START_SECTOR equ 0x2 ; 加载器起始扇区(硬盘的第二个扇区)
+LOADER_BASE_ADDR equ 0x900      ; 加载器被加载至内存中的地址
+LOADER_START_SECTOR equ 0x2     ; 加载器起始扇区(硬盘的第二个扇区)
+PAGE_DIR_TABLE_POS equ 0x100000 ; 页目录表起始地址:低端1MB内存的第一个字节(偏移地址)
 
 ; ----------------- gdt descriptor ------------------
 DESC_G_4K equ 1_00000000000000000000000b ; 段描述符G位设定4K精度, 访问范围0~4G ⚡️ 23
@@ -44,3 +45,10 @@ RPL2 equ 10b
 RPL3 equ 11b
 TI_GDT equ 000b
 TI_LDT equ 100b
+
+; ---------- page table ----------
+PG_P equ 1b        ; 存在位, 默认为1表示该页存在物理内存中
+PG_RW_R equ 00b    ; 读写位, 只读
+PG_RW_W equ 10b    ; 读写位, 可写
+PG_US_S equ 000b   ; 特权级: 0, 1, 2    可访问
+PG_US_U equ 100b   ; 特权级: 0, 1, 2, 3 可访问

@@ -27,11 +27,11 @@ total_mem_bytes dd 0  ; dd=>define double word(双字), 4字节大小变量
                       ; 4字节大小变量可以表示: 2^32=4294967296 --> 正好:)
 ; 以下是gdt的指针, 前2字节是gdt界限, 后4字节是gdt起始地址
 ; lgdt 48位操作数(6个字节)
-gdt_ptr dw GDT_LIMIT
-        dd GDT_BASE
+gdt_ptr dw GDT_LIMIT  ; 2字节
+        dd GDT_BASE   ; 4字节
 ; loadermsg db 'Hello UiharuOS!'
 
-; 人工对齐: 
+; 人工对齐:
 ; 定义缓冲区, 存储BIOS 0x15中断0xe820子功能返回的ARDS结构
 ; 每执行该中断一次便会得到一个ARDS结构的数据,放入缓冲区中
 ; 以便后续遍历
@@ -159,8 +159,9 @@ loader_start:
     mov eax, cr0
     or eax, 0x00000001
     mov cr0, eax
-    
-jmp dword SELECTOR_CODE:p_mode_start  ; 刷新流水线
+
+jmp dword SELECTOR_CODE:p_mode_start  ; 刷新CPU流水线
+; 考虑到下面的部分指令取指和译码可能是在16位下完成的, 所以刷新流水线
 
 .error_hlt:
     hlt  ; 出错则挂起
@@ -174,7 +175,95 @@ p_mode_start:
     mov esp, LOADER_STACK_TOP
     mov ax, SELECTOR_VIDEO
     mov gs, ax
+;-------------------------------------------------------
+; 开启分页机制
+; -> 初始化页目录表和页表
+; -> 载入页目录表的物理地址到cr3
+; -> 开启cr0的PG位为1
+;-------------------------------------------------------
+    ; 创建页目录及页表并初始化页内存分布
+    call setup_page
+    ; 准备重载GDT内相关描述符到内核地址空间(3GB以上)
+    ; -- 显存段(为什么显存段要单独考虑?而不是和整个GDT一起重载?)
+    ; -- 栈段
+    sgdt [gdt_ptr] ; 先将GDT放回到gdt_ptr指向的内存
+    mov ebx, [gdt_ptr + 2] ; ebx是GDT的起始地址
+    ; ebx+0x18(3*8byte)+4(段基址在段描述符中高4字节)=显存段在内存中的地址
+    ; 和3GB(以上)起始地址: 0xc0000000做或运算, 得出重载后的显存段地址
+    or dword [ebx + 0x18 + 0x4], 0xc0000000
+    ; 得出重载后GDT基址
+    add dword [gdt_ptr + 2], 0xc0000000
+    ; 栈指针也指向内核基地址
+    add esp, 0xc0000000
 
-    ;mov byte [gs:160], 'P'
+    ; cr3加载页目录物理地址
+    mov eax, PAGE_DIR_TABLE_POS
+    mov cr3, eax  ; 控制寄存器和通用寄存器之间可以相互传递数据
+
+    ; 打开cr0的pg位
+    mov eax, cr0
+    or eax, 0x80000000
+    mov cr0, eax
+
+    ; 开启分页后, 用gdt新的地址重新加载
+    lgdt [gdt_ptr]
+
+    mov byte [gs:160], 'V'
 
 jmp $
+
+;-------------------------------------------------------
+; 创建页目录表及页表
+;-------------------------------------------------------
+setup_page:
+; 先把页目录占用的空间逐字节清0
+; -> 页目录表包含1K个页目录表项, 每个表项是4字节32位
+; -> 所以页目录表大小是4K
+    mov ecx, 4096  ; 4kb(4096字节): 循环界限(CX寄存器)
+    mov esi, 0
+.clear_page_dir:
+; 依据字节偏移量, 从页目录表基址开始逐字节清0
+    mov byte [PAGE_DIR_TABLE_POS + esi], 0
+    inc esi
+    loop .clear_page_dir
+; 开始创建页目录项(PDE)
+.create_pde: ; 创建P(age)D(irectory)E(ntry)
+    mov eax, PAGE_DIR_TABLE_POS
+    add eax, 0x1000 ; 基址+偏移地址(4KB)->第一个页表起始物理地址(紧凑)
+    mov ebx, eax    ; ebx作为第一个页表基址, 用于.create_pte
+    or eax, PG_US_U | PG_RW_W | PG_P ; (0,1,2,3)+可写+位于内存中, 低3位用来控制内存页属性
+; 在页目录表中的第1个目录项写入第1个页表的位置(0x101000)及属性
+; 把loader的虚拟地址空间映射到低端1MB内存保证loader的正常运行
+    mov [PAGE_DIR_TABLE_POS + 0x0], eax
+; 一个页表占用4字节, 0xc00表示第(12*16*16/4=768)个页表占用的目录项
+; 内核虚拟空间3GB以上(0xc0000000)映射到低端1MB内存0x101000处
+    mov [PAGE_DIR_TABLE_POS + 0xc00], eax
+; 现在页目录表第0项和第768项指向的都是同一个页表0x101000->物理内存(低端1MB)<-内核
+; 0xc00000000~0xffffffff 1G属于内核
+; 0x000000000~0xbfffffff 3G属于用户进程
+    sub eax, 0x1000
+; 页目录表的大小是4096byte->4kb, 4092是最后一个页目录表项的起始地址
+    mov [PAGE_DIR_TABLE_POS + 4092], eax ; 使最后一个目录项指向页目录表自己的地址
+; 创建页表项PTE(通过循环创建)
+; loader, mbr, kernel都是运行在低端1MB内存之内的
+; 所以目前只需要初始化低端1MB内存的页表(1MB)
+    mov ecx, 256  ; 1M低端内存/4k=256, 一个物理页标准大小4K
+    mov esi, 0
+    mov edx, PG_US_U | PG_RW_W | PG_P
+.create_pte:
+    mov [ebx + esi*4], edx ; ebx已经被赋值为0x101000即第一个页表的地址
+    add edx, 4096 ; 4KB按照一个物理页的字节数递归, 从而初始化整个页表
+    inc esi
+    loop .create_pte
+; 创建内核其他页表的PDE
+    mov eax, PAGE_DIR_TABLE_POS
+    add eax, 0x2000 ; 页目录表的1KB+第0项1KB
+    or eax, PG_US_U | PG_RW_W | PG_P
+    mov ebx, PAGE_DIR_TABLE_POS
+    mov ecx, 254 ; 循环变量256-2
+.create_kernel_pde:
+    mov [ebx+esi*4], eax
+    inc esi
+    add eax, 0x1000 ; 4KB增长循环初始化
+    loop .create_kernel_pde
+    ret
