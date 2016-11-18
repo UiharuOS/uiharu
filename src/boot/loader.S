@@ -203,11 +203,13 @@ p_mode_start:
 
     ; cr3加载页目录物理地址
     mov eax, PAGE_DIR_TABLE_POS
+    ; mov eax, 0x100000
     mov cr3, eax  ; 控制寄存器和通用寄存器之间可以相互传递数据
 
     ; 打开cr0的pg位
     mov eax, cr0
     or eax, 0x80000000
+    ;mov eax, 0xe0000011
     mov cr0, eax
 
     ; 开启分页后, 用gdt新的地址重新加载
