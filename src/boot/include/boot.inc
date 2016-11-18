@@ -36,7 +36,7 @@ DESC_DATA_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + \
 DESC_VIDEO_HIGH4 equ (0x00 << 24)+ DESC_G_4K + DESC_D_32 + \
                                    DESC_L + DESC_AVL + DESC_LIMIT_VIDEO2 + \
                                    DESC_P + DESC_DPL_0 + DESC_S_DATA + DESC_TYPE_DATA + \
-                                   0x00;                                       ⚡️ 24~31
+                                   0x0b;                                       ⚡️ 24~31
 
 ; ----------- selector -----------
 RPL0 equ 00b

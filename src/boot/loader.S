@@ -131,7 +131,7 @@ loader_start:
     add edx, 0x100000   ; 0x88号子功能只会返回1MB以上的内存
                         ; 所以实际内存大小加上1MB
 .mem_get_ok:
-    mov [total_mem_bytes], edx  ; 以byte为单位的内存总量
+    mov [total_mem_bytes], edx  ; 以byte为单位的内存总量(✅ )
 
 ;-------------------------------------------------------
 ; bios 0x10中断 打印字符串
@@ -192,7 +192,7 @@ p_mode_start:
     ; 和3GB(以上)起始地址: 0xc0000000做或运算, 得出重载后的显存段地址
     ; mov eax, 0xc0000000
     ; or eax, PG_US_U | PG_RW_W | PG_P
-    or dword [ebx + 0x18 + 0x4], 0xc0000000
+    or dword [ebx + 0x18 + 4], 0xc0000000
     ; or dword [ebx + 0x18 + 4], eax
     ; 得出重载后GDT基址
     add dword [gdt_ptr + 2], 0xc0000000
