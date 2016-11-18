@@ -184,17 +184,22 @@ p_mode_start:
     ; 创建页目录及页表并初始化页内存分布
     call setup_page
     ; 准备重载GDT内相关描述符到内核地址空间(3GB以上)
-    ; -- 显存段(为什么显存段要单独考虑?而不是和整个GDT一起重载?)
+    ; -- 显存段
     ; -- 栈段
     sgdt [gdt_ptr] ; 先将GDT放回到gdt_ptr指向的内存
     mov ebx, [gdt_ptr + 2] ; ebx是GDT的起始地址
     ; ebx+0x18(3*8byte)+4(段基址在段描述符中高4字节)=显存段在内存中的地址
     ; 和3GB(以上)起始地址: 0xc0000000做或运算, 得出重载后的显存段地址
+    ; mov eax, 0xc0000000
+    ; or eax, PG_US_U | PG_RW_W | PG_P
     or dword [ebx + 0x18 + 0x4], 0xc0000000
+    ; or dword [ebx + 0x18 + 4], eax
     ; 得出重载后GDT基址
     add dword [gdt_ptr + 2], 0xc0000000
+    ; add dword [gdt_ptr + 2], eax
     ; 栈指针也指向内核基地址
     add esp, 0xc0000000
+    ; add esp, eax
 
     ; cr3加载页目录物理地址
     mov eax, PAGE_DIR_TABLE_POS
@@ -215,6 +220,7 @@ jmp $
 ;-------------------------------------------------------
 ; 创建页目录表及页表
 ;-------------------------------------------------------
+[bits 32] 
 setup_page:
 ; 先把页目录占用的空间逐字节清0
 ; -> 页目录表包含1K个页目录表项, 每个表项是4字节32位
@@ -260,7 +266,8 @@ setup_page:
     add eax, 0x2000 ; 页目录表的1KB+第0项1KB
     or eax, PG_US_U | PG_RW_W | PG_P
     mov ebx, PAGE_DIR_TABLE_POS
-    mov ecx, 254 ; 循环变量256-2
+    mov ecx, 254
+    mov esi, 769 ; 768+
 .create_kernel_pde:
     mov [ebx+esi*4], eax
     inc esi

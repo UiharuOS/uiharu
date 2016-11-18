@@ -51,4 +51,5 @@ PG_P equ 1b        ; 存在位, 默认为1表示该页存在物理内存中
 PG_RW_R equ 00b    ; 读写位, 只读
 PG_RW_W equ 10b    ; 读写位, 可写
 PG_US_S equ 000b   ; 特权级: 0, 1, 2    可访问
-PG_US_U equ 100b   ; 特权级: 0, 1, 2, 3 可访问
+;PG_US_U equ 100b   ; 特权级: 0, 1, 2, 3 可访问
+PG_US_U equ 1b
