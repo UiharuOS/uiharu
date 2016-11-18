@@ -1,29 +1,32 @@
-; UIHARU::MBR
 ;---------------------------------------------------------------------------
-; nasm编译器中的预处理指令, 在编译器编译前, 包含boot.inc文件
+; UIHARU::MBR E bootloader (512字节)
+;---------------------------------------------------------------------------
 %include "boot.inc"
-SECTION MBR vstart=0x7c00 ; bios会把mbr加载到0x7c00处, 所以从0x7c00处开始
+SECTION MBR vstart=0x7c00 ; bios把mbr加载到0x7c00处~31KB
+; 初始化各寄存器, 段寄存器需要依靠通用寄存器初始化
   mov ax, cs
   mov ds, ax
   mov es, ax
   mov ss, ax
   mov fs, ax
-  mov sp, 0x7c00 ; 栈指针寄存器指向0x7c00, 作为MBR栈
-  mov ax, 0xb800 ; 显卡寄存器地址0xb8000, 实模式寻址, 段基址: 0xb800
-  mov gs, ax     ; 显卡
+  mov sp, 0x7c00 ; 栈指针寄存器指向0x7c00
+  mov ax, 0xb800 ; 显卡寄存器地址0xb8000, 实模式寻址会左移16位<-0xb800
+  mov gs, ax     ; gs显卡基址, 通过gs可以操作显卡
 ;---------------------------------------------------------------------------
 ; 清屏操作
 ; INT 0x10  功能号: 0x06  功能描述: 上卷窗口
 ;---------------------------------------------------------------------------
-  mov ax, 0x600  ; bios 0x10中断的功能号
+  mov ax, 0x600  ; bios 0x10中断第0x600号功能
   mov cx, 0      ; 左上角: (0, 0)
   mov dx, 0x184f ; VGA[文本模式]中, 一行容纳80个字符, 共25行
                  ; 下标从0开始, 0x18=24, 0x4f=79
                  ; 由于x86CPU是[小端模式] -> 0x184f
                  ; 左上->右下: clear screen
-  int 0x10       ; 使用INT 0x10
-
+  int 0x10       ; INT 0x10
+;---------------------------------------------------------------------------
+; 操作显卡输出字符
 ; PRINT BG-COLOR GREEN, FR-COLOR RED, FLASH STRING "16bit"
+; 输出16bit表示当前处于CPU16位实模式
 ;---------------------------------------------------------------------------
 mov byte [gs:0x00], '1'
 mov byte [gs:0x01], 0xA4
@@ -46,12 +49,14 @@ mov byte [gs:0x0B], 0xA4
 mov eax, LOADER_START_SECTOR    ; loader在硬盘上的LBA地址: 0x2, 第二块扇区
                                 ; 66B802000000(0x66操作数反转前缀)
 mov bx, LOADER_BASE_ADDR        ; loader在内存中的位置: 0x900
-mov cx, 4                       ; 待读入的扇区数
+mov cx, 4                       ; 待读入的扇区数(2KB)
 call rd_disk_m_16               ; call调用函数: 从磁盘中读加载器到内存
 
 ; jmp LOADER_BASE_ADDR          ; 跳转访问加载器(栈)
-jmp LOADER_BASE_ADDR + 0x300
+jmp LOADER_BASE_ADDR + 0x300    ; 使用绝对内存大小跳转
+; LOADER_BASE_ADDR + 0x300 是loader_start的地址
 
+;---------------------------------------------------------------------------
 ; 函数: rd_disk_m_16
 ; -> 功能: 读取硬盘的n个扇区
 ; --> eax: 加载器的LBA扇区号
