@@ -3,18 +3,21 @@ section loader vstart=LOADER_BASE_ADDR
 LOADER_STACK_TOP equ LOADER_BASE_ADDR
 ; jmp loader_start
 
+;-------------------------------------------------------
 ; 构建gdt及其内部描述符
+; -> 代码段, 数据段, 显存段
+;-------------------------------------------------------
 GDT_BASE: dd 0x00000000
-          dd 0x00000000  ; GDT定义从0开始
+          dd 0x00000000  ; GDT定义从0开始(相对于0x900)
 CODE_DESC: dd 0x0000FFFF ; 段界限0xFFFF 0~15位, 段基址的0~15位, 平坦模式段基址都是0
            dd DESC_CODE_HIGH4 ; 段描述符的高32位
 DATA_STACK_DESC: dd 0x0000FFFF
                  dd DESC_DATA_HIGH4
 VIDEO_DESC: dd 0x80000007 ; 0xb800 + limit=(0xbffff-0xb8000)/4k=0x7
             dd DESC_VIDEO_HIGH4
-GDT_SIZE equ $ - GDT_BASE
-GDT_LIMIT equ GDT_SIZE - 1
-times 60 dq 0  ; 此处预留60个描述符空位, 先用0占位
+GDT_SIZE equ $ - GDT_BASE  ; 32字节? 0x20
+GDT_LIMIT equ GDT_SIZE - 1 ; 0x1F
+times 60 dq 0  ; 此处预留60个描述符空位, 先用0占位(还没有被规划为gdt)
 SELECTOR_CODE equ (0x0001<<3) + TI_GDT + RPL0
 SELECTOR_DATA equ (0x0002<<3) + TI_GDT + RPL0
 SELECTOR_VIDEO equ (0x0003<<3)+ TI_GDT + RPL0
@@ -27,8 +30,10 @@ total_mem_bytes dd 0  ; dd=>define double word(双字), 4字节大小变量
                       ; 4字节大小变量可以表示: 2^32=4294967296 --> 正好:)
 ; 以下是gdt的指针, 前2字节是gdt界限, 后4字节是gdt起始地址
 ; lgdt 48位操作数(6个字节)
-gdt_ptr dw GDT_LIMIT  ; 2字节
-        dd GDT_BASE   ; 4字节
+; -- 前16位是GDT以[字节]为单位的界限值: GDT大小-1
+; -- 后32位是GDT的起始地址
+gdt_ptr dw GDT_LIMIT  ; 2字节 1Fh
+        dd GDT_BASE   ; 4字节 0x900
 ; loadermsg db 'Hello UiharuOS!'
 
 ; 人工对齐:
@@ -39,7 +44,8 @@ ards_buf times 244 db 0  ; ards_buf指向内存缓冲区地址,大小是244
                          ; 一个ARDS结构体是20字节, 可以容纳12个ARDS结构
 ards_nr dw 0 ; 用于记录ARDS结构体的数量==>2字节
 
-; 文件内偏移地址: 0xb00 + (4+6+244+2) = 0x200 + 0x100 = 0x300
+; 文件内偏移地址: 0x200(total_mem处的偏移)+(4+6+244+2)=0x200+0x100=0x300
+; loader_start的实际地址在0xc00-:) 符合实模式低端1MB内存RAM可用区-:)
 loader_start:
 ;-------------------------------------------------------
 ; bios 0x15中断 e820子功能 获取物理内存布局
