@@ -15,8 +15,3 @@
     4. kernel:) -> written in C
 + **grub**
     - 再说:)
-
-![uiharu](https://cloud.githubusercontent.com/assets/10671733/19648940/790d61d2-9a36-11e6-9456-afc791a1ded9.jpg)
-
-## Change logs
-### 161102⚡️ [uiharuOS0_0_0_0_1.iso](https://github.com/UiharuOS/uiharu/blob/master/disk_images/uiharuOS0_0_0_0_1.iso)
