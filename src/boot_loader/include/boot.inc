@@ -4,6 +4,7 @@ LOADER_START_SECTOR equ 0x2           ; loader在硬盘的起始扇区(lba)
 KERNEL_BIN_BASE_ADDR equ 0x70000      ; 内核在内存中的地址
 KERNEL_IMAGE_BASE_ADDR  equ   0x1500  ; 内核映像在内存中的地址
 KERNEL_START_SECTOR equ 0x9           ; 内核在硬盘的起始扇区(lba)
+KERNRL_ENTRY_POINT equ 0xc0001500     ; 内核起始虚拟地址
 
 PAGE_DIR_TABLE_POS equ 0x100000  ; 页目录表放到低端1MB内存以上
 
@@ -44,3 +45,6 @@ PG_RW_R	 equ  00b
 PG_RW_W	 equ  10b
 PG_US_S	 equ  000b
 PG_US_U	 equ  100b
+
+;----------  elf program header相关属性 ----------
+PT_NULL equ 0  ; 空段类型

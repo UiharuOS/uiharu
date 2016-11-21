@@ -174,7 +174,7 @@ jmp dword SELECTOR_CODE:p_mode_start  ; 刷新CPU流水线
 
 [bits 32]
 p_mode_start:
-    mov ax, SELECTOR_DATA
+    mov ax, SELECTOR_DATA  ; ds, es, ss被初始化为相同的选择子, 指向相同的数据段
     mov ds, ax
     mov es, ax
     mov ss, ax
@@ -230,10 +230,121 @@ p_mode_start:
     ; 开启分页后, 用gdt新的地址重新加载
     lgdt [gdt_ptr]
 
-    mov byte [gs:160], 'V'
+    jmp SELECTOR_CODE:enter_kernel  ; 利用jmp跳转指令, 强制刷新流水线, 更新gdt
 
+enter_kernel:
+    call kernel_init       ; 初始化内核映像
+    mov esp, 0xc009f000    ; 初始化栈顶到0xc009f000
+    jmp KERNEL_ENTRY_POINT ; jmp进入内核
+    
     jmp $
+;-------------------------------------------------------
+; rd_disk_m_32: 硬盘内核文件读取
+; -> eax: kernel.bin所在的扇区号
+; -> ebx: 写入到的内存地址
+; -> ecx: 读入的扇区数(可以设置为循环变量)
+;-------------------------------------------------------
+rd_disk_m_32:
+    mov esi, eax    ; 备份eax
+    mov di, cx      ; 备份cx
+; 读写硬盘
+; -> step1: 设置要读取的扇区数
+    mov dx, 0x1f2   ; 0x1f2: primary通道, sector count寄存器
+    mov al, cl      ; cl: the least significant 8 bits of the cx
+    out dx, al      ; 读取的扇区数
+    mov eax, esi    ; 恢复eax
+; -> step2: 将lba地址存入0x1f3~0x1f6
+    ;lbalow 7~0
+    mov dx, 0x1f3
+    out dx, al
+    ;lbamid 15~8
+    mov cl, 8
+    shr eax, cl
+    mov dx, 0x1f4
+    out dx, al      ; al: the least significant 8 bits of the ax
+    ;lbahigh 23~16
+    shr eax, cl
+    mov dx, 0x1f5
+    out dx, al      ; 0
+    ;lba device
+    shr eax, cl
+    and al, 0x0f
+    or al, 0xe0     ; 11100000
+    mov dx, 0x1f6
+    out dx, al      ; device寄存器的低4位(存储lba24~27), 第4位0主盘;第6位1lba;第5和7位固定为1
+; -> step3: 向0x1f7端口写入读命令
+    mov dx, 0x1f7   ; 初始化状态寄存器
+    mov al, 0x20    ; 0010 0000: DRDY: 设备就绪等待指令
+    out dx, al      ; 写操作, command寄存器, 硬盘开始工作
+; -> step4: 检测硬盘状态
+    .not_ready:
+        nop
+        in al, dx
+        and al, 0x88
+        cmp al, 0x08
+        jnz .not_ready
+; -> step5: 从0x1f0端口读数据
+        mov ax, di
+        mov dx, 256
+        mul dx
+        mov cx, ax
+        mov dx, 0x1f0
+    .go_on_read:
+        in ax, dx
+        mov [ebx], ax
+        add ebx, 2  ; ebx 操作数, 寻址方式反转, 防止读取的扇区数过大, 地址回卷, 破坏已经读写的内存
+    loop .go_on_read
+    ret
+;-------------------------------------------------------
+; 将kernel.bin中的segment拷贝到指定的地址
+; -> 内核映像
+;-------------------------------------------------------
+kernel_init:
+; eax, ebx, ecx, edx清零
+    xor eax, eax
+    xor ebx, ebx
+    xor ecx, ecx
+    xor edx, edx
 
+    mov dx, [KERNEL_BIN_BASE_ADDR + 42]  ; dx: e_phentrysize: program header的大小
+    mov ebx, [KERNEL_BIN_BASE_ADDR + 28]
+    add ebx, KERNEL_BIN_BASE_ADDR        ; ebx: e_phoff: 第一个program header在内存中的物理地址
+    mov cx, [KERNEL_BIN_BASE_ADDR + 44]  ; cx: e_phnum: program header的数目, 作为外层loop循环的循环计数
+.each_segment:
+    cmp byte [ebx + 0], PT_NULL
+    je .PTNULL    ; 如果为1, 进入PTNULL, 否则继续
+; 函数 mem_cpy(dst, src, size)
+; -> 将参数压入栈中, 函数返回地址会自动压栈, 栈底实则为空
+    push dword [ebx + 16]         ; p_filesz, 将第三个形参压入栈中
+    mov eax, [ebx + 4]            ; p_offset
+    add eax, KERNEL_BIN_BASE_ADDR ; eax为该段的物理地址
+    push eax                      ; eax为该段源地址, 压入第二个参数
+    push dword [ebx + 8]          ; p_vaddr: 压入第一个参数->目的地址
+
+    call mem_cpy                  ; 调用mem_cpy函数
+    add esp, 12                   ; 栈是向下扩展的, add esp, 将3个形参出栈, 垃圾回收(就是以后被覆盖orz...)
+.PTNULL:
+    add ebx, edx  ; 跳过空段, 拷贝下一个segment
+    loop .each_segment  ; 因为如果没有空段, 那就是连续, 一次each_segment调用mem_cpy就可以拷贝完
+    ret
+;-------------------------------------------------------
+; mem_cpy函数: 从源地址拷贝连续字节到目标地址
+; -> movs[bwd] + rep + c[s]ld 三剑客...➖
+;-------------------------------------------------------
+mem_cpy:
+    cld          ; clean direction, 设置eflags寄存器方向标志位DF为0, 自动增加esi, edi寄存器指向内存地址的值
+    push ebp     ; 备份ebp, 外围"作用域"需要使用ebp
+    mov ebp, esp ; ebp指向当前栈顶
+    push ecx     ; 备份ecp, 外围
+    ; 栈是向下扩展的
+    mov edi, [ebp + 8]  ; 第一个形参: dst
+    mov esi, [ebp + 12] ; 第二个形参: src
+    mov ecx, [ebp + 16] ; 第三个形参: size (作为rep重复计数)
+    rep movsb    ; movsb 一次从`DS:[E]SI`拷贝1个字节到`ES:[E]DI`
+    ; 恢复环境
+    pop ecx
+    pop ebp
+    ret
 ;-------------------------------------------------------
 ; 创建页目录表及页表
 ;-------------------------------------------------------
