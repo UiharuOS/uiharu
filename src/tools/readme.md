@@ -1,4 +1,4 @@
 # tools
 
 + **misaka**: xdd, read elf
-+ **compile_kernel**: compile link and write kernel to bochs virtual disk file
++ **write_kernel_2_disk**: write kernel to bochs virtual disk file
