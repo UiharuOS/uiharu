@@ -2,7 +2,7 @@
 
 > neo1218's hobby OS
 
-+ **32bit**✅ **x86**😄 **posix**⚡️ 
++ **32bit**✅ **x86**😄 **posix**⚡️
 
 ## [📝 BootLoader](https://github.com/UiharuOS/uiharu/tree/master/src/boot_loader)
 主引导记录, 内核加载
@@ -25,10 +25,9 @@ Bochs虚拟机模拟环境配置, 可作为硬件环境参考
 某不科学的iso文件🐛 , 方便安装uiharu
 
 <hr/>
-## ⚡️ Build Kernel
+## ⚡️ Build and Write Kernel to disk
 
     $ cd src
-    $ make
-    $ ./tools/write_kernel_2_disk.sh kernel.bin
+    $ python(2) bit32_kernel_make.py
 
-build 32 bit elf binary file: ```src/kernel.bin```
+![procedure](https://cloud.githubusercontent.com/assets/10671733/20539255/5be45a1a-b12f-11e6-8ede-8bda6c24d784.png)
