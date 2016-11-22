@@ -13,6 +13,11 @@
 ## [🔧 Tools](https://github.com/UiharuOS/uiharu/tree/master/src/tools)
 常用脚本
 
+## [📜 Lib](https://github.com/UiharuOS/uiharu/tree/master/src/lib)
+各种库文件(函数), 供kernel, userland使用
+
+<hr/>
+
 ## [🍙 Bochs](https://github.com/UiharuOS/uiharu/tree/master/bochs)
 Bochs虚拟机模拟环境配置, 可作为硬件环境参考
 
