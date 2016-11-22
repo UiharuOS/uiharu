@@ -37,5 +37,7 @@ loader内核加载器💻  <br/>
         + 重载GDT
 
 ## bootloader内存布局
-![bootloader内存布局](https://cloud.githubusercontent.com/assets/10671733/20454750/d39f2be6-ae84-11e6-8716-073d243d2e40.png)
+![bootloader内存布局](https://cloud.githubusercontent.com/assets/10671733/20513472/00ac3f46-b0c1-11e6-96c8-a3302e6e6c83.png)
 
+内核映像在虚拟地址空间```0xc0001500-->0x1500```
+<hr/>
