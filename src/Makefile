@@ -8,14 +8,16 @@ Ttext = -Ttext $(KERNEL_ADDR)
 
 all: kernel.bin clean
 
-kernel.bin: kernel_main.o lib_kernel_print.o
-	ld -m elf_i386 $(Ttext) -e main -o kernel.bin kernel/main.o lib/kernel/print.o
+kernel.bin: kernel_main.o lib_kernel_print.o lib_kernel_printS.o
+	ld -m elf_i386 $(Ttext) -e main -o kernel.bin kernel/main.o lib/kernel/print.o lib/kernel/printS.o
 
 kernel_main.o: kernel/main.c
 	$(CC) $(CFLAGS) -c -o kernel/main.o kernel/main.c
 
 lib_kernel_print.o: lib/kernel/print.S
 	nasm -f elf32 -o lib/kernel/print.o lib/kernel/print.S
+lib_kernel_printS.o: lib/kernel/printS.c
+	$(CC) $(CFLAGS) -c -o lib/kernel/printS.o lib/kernel/printS.c
 
 clean:
 	rm **/*.o

@@ -3,5 +3,6 @@
 
 #include "stdint.h"
 void print_char(uint8_t ascii_char);
+void print_string(char string[], uint64_t size);
 
 #endif
