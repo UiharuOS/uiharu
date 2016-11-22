@@ -6,6 +6,15 @@ boot负责```bios加载mbr,mbr从硬盘中把loader加载入内存```, 工作在
 loader负责开启保护模式、开启内存分页为加载内核做准备
 
 ## 特性
+bios(basic input output system)🎬 <br/>
+
++ 计算机起始指令地址: 0xf000:0xfff0
++ --> 0xffff0: jmp 0xe05b
++ --> bios代码, 执行bios
+    - POST
+    - INT 19h -> mbr
+
+<hr/>
 mbr主引导记录📝  <br/>
 
 + mbr在0盘0道1扇区(CHS表示法)512字节
@@ -15,6 +24,7 @@ mbr主引导记录📝  <br/>
     + mbr在0x7c00
     + 实模式低端1MB内存```0x7e00~0x9fbff```约608KB是可用区域, 放loader和kernel足够了:)
 
+<hr/>
 loader内核加载器💻  <br/>
 
 + 为了加载内核, 需要进入保护模式, 以及开启内存分页
