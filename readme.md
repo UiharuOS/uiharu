@@ -23,3 +23,11 @@ Bochs虚拟机模拟环境配置, 可作为硬件环境参考
 
 ## [🎫 DiskImages](https://github.com/UiharuOS/uiharu/tree/master/disk_images)
 某不科学的iso文件🐛 , 方便安装uiharu
+
+<hr/>
+## ⚡️ Build Kernel
+
+    $ cd src
+    $ make
+
+build 32 bit elf binary file: ```src/kernel.bin```
