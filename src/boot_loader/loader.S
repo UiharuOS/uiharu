@@ -18,7 +18,7 @@ VIDEO_DESC: dd 0x80000007 ; 0xb800 + limit=(0xbffff-0xb8000)/4k=0x7
 GDT_SIZE equ $ - GDT_BASE  ; 32字节? 0x20
 GDT_LIMIT equ GDT_SIZE - 1 ; 0x1F
 times 60 dq 0  ; 此处预留60个描述符空位, 先用0占位(还没有被规划为gdt)
-SELECTOR_CODE equ (0x0001<<3) + TI_GDT + RPL0
+SELECTOR_CODE equ (0x0001<<3) + TI_GDT + RPL0  ; 0特权级
 SELECTOR_DATA equ (0x0002<<3) + TI_GDT + RPL0
 SELECTOR_VIDEO equ (0x0003<<3)+ TI_GDT + RPL0
 ; 保存检测出来的内存大小
@@ -231,12 +231,13 @@ p_mode_start:
     lgdt [gdt_ptr]
 
     jmp SELECTOR_CODE:enter_kernel  ; 利用jmp跳转指令, 强制刷新流水线, 更新gdt
+                                    ; SELECTOR_CODE代码段(DPL)RPL0=>CPU CPL也为0, 当前CPU处于0特权级
 
 enter_kernel:
     call kernel_init       ; 初始化内核映像
     mov esp, 0xc009f000    ; 初始化栈顶到0xc009f000
     jmp KERNEL_ENTRY_POINT ; jmp进入内核
-    
+
     jmp $
 ;-------------------------------------------------------
 ; rd_disk_m_32: 硬盘内核文件读取
