@@ -50,16 +50,25 @@ print_char:
 
 .is_bs:
     ;dec bx                 ; 光标坐标指向前一个字符
-    sub bx, 2
+    ;sub bx, 2
+    ;sub bx, 1
     ;sub bx, 2
     ;shl bx, 1              ; 光标左移一位, bx*2
     ;mov byte [gs:bx], 0x20 ; 将待删除的字符的低字节Ascii码设为空格Space
-    ;;inc bx                 ; 光标+1,指向属性位
-    ;add bx, 1
+
+    ;inc bx                 ; 光标+1,指向属性位
+    ;;add bx, 1
     ;mov byte [gs:bx], 0x07 ; 将待删除的字符的高字节属性设为0x07(00000111):黑屏白字
-    ;sub bx, 1
+    ;;sub bx, 1
     ;shr bx, 1              ; 显存相对地址 -> 光标坐标
-    jmp .set_cursor        ; 设置光标的位置(更新光标坐标寄存器)
+    ;jmp .set_cursor        ; 设置光标的位置(更新光标坐标寄存器)
+    shl bx, 1
+    mov byte [gs:bx], 0x00
+    inc bx
+    mov byte [gs:bx], 0x07
+    shr bx, 1
+    inc bx
+    jmp .set_cursor
 ; 换行、回车全部设为到下一行行首
 .is_lf:                     ; 换行
 .is_cr:                     ; 回车

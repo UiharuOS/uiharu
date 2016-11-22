@@ -10,6 +10,8 @@ void main(void) {
     print_char('\n');
     print_char('O');
     print_char('S');
-    print_char('\b');
+    //print_char('\b');
+    //print_char('S');
+    print_char('\r');
     while(1);
 }
