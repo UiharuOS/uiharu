@@ -50,7 +50,7 @@ print_char:
 
 .is_bs:
     ;dec bx                 ; 光标坐标指向前一个字符
-    sub bx, 2
+    sub bx, 
     ;sub bx, 2
     ;shl bx, 1              ; 光标左移一位, bx*2
     ;mov byte [gs:bx], 0x20 ; 将待删除的字符的低字节Ascii码设为空格Space
