@@ -29,5 +29,6 @@ Bochs虚拟机模拟环境配置, 可作为硬件环境参考
 
     $ cd src
     $ make
+    $ ./tools/write_kernel_2_disk.sh kernel.bin
 
 build 32 bit elf binary file: ```src/kernel.bin```
