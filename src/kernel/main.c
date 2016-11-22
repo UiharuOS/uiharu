@@ -9,8 +9,8 @@ void main(void) {
     print_char('u');
     print_char('\n');
     print_char('O');
-    print_char('S');
-    print_char('\b');
+    // print_char('S');
+    // print_char('\b');
     print_char('S');
     while(1);
 }
