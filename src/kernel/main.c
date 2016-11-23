@@ -9,7 +9,7 @@ void main(void) {
     print_char('r');
     print_char('u');
     */
-    print_string("uiharu\n");
+    print_string("I love uiharu\nuiharu\n");
     print_char('O');
     print_char('S');
     //print_char('\b');
