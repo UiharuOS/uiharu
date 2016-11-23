@@ -5,6 +5,30 @@ SELECTOR_VIDEO equ (0x0003<<3) + TI_GDT + RPL0
 [bits 32]
 section .text
 ;------------------------------------------------
+; print_str: 打印字符串, 基于print_char
+;------------------------------------------------
+global print_str
+print_str:
+    push ebx  ; 备份ebx寄存器
+    push ecx  ; 备份ecx寄存器
+    xor ecx, ecx ; 清0ecx
+    mov ebx, [esp + 12] ;  拿到待打印的字符串地址
+.handle:
+    ; 利用地址, 实现字符串的不定长输出
+    ; ebx: 是字符串首地址, inc ebx
+    mov cl, [ebx] ; 每个字符放到8位寄存器中,只比较字符的ascii码
+    cmp cl, 0 ; C编译器会自动给字符串加'\0', '\0'的ascii码是0
+    jz .str_over
+    push ecx  ; 为print_char函数传参数(cl)
+    call print_char
+    add esp, 4 ; 回收ecx参数空间
+    inc ebx   ; ebx指向下一个字符
+    jmp .handle ; 继续处理下一个字符
+.str_over:
+    pop ecx   ; 恢复ecx
+    pop ebx   ; 恢复ebx
+    ret
+;------------------------------------------------
 ; print_char: 把栈中的一个字符写入光标所在的位置
 ;------------------------------------------------
 global print_char   ; 导出为全局变量, 供外部文件调用

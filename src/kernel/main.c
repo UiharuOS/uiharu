@@ -15,5 +15,6 @@ void main(void) {
     //print_char('\b');
     //print_char('S');
     print_char('\r');
+    print_str("misaka ");
     while(1);
 }
