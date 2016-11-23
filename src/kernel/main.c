@@ -1,6 +1,5 @@
 #include "print.h"  // lib/kernel/print.h
 void main(void) {
-    char string[8] = "uiharuos";
     /* kernel main */
     /*
     print_char('u');
@@ -10,8 +9,7 @@ void main(void) {
     print_char('r');
     print_char('u');
     */
-    print_string(string, 8);
-    print_char('\n');
+    print_string("uiharu\n");
     print_char('O');
     print_char('S');
     //print_char('\b');
