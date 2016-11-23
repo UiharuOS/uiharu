@@ -10,7 +10,14 @@ void main(void) {
     print_char('u');
     */
     print_string("---------  test int --------\n");
-    print_char(48);  // ascii
+    print_int(1234567890, 'D');
+    print_char('\n');
+    print_string("Decimal ");
+    print_int(57435, 'D');
+    print_string("\nHexadecimal ");
+    print_int(57435, 'H');
+    print_string("\nBinary ");
+    print_int(57435, 'B');
     print_string("\n---------  test str --------\n");
     print_string("I love uiharu\nuiharu\n");
     print_char('O');
