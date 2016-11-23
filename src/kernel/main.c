@@ -9,6 +9,9 @@ void main(void) {
     print_char('r');
     print_char('u');
     */
+    print_string("---------  test int --------\n");
+    print_char(48);  // ascii
+    print_string("\n---------  test str --------\n");
     print_string("I love uiharu\nuiharu\n");
     print_char('O');
     print_char('S');

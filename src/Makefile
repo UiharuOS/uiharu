@@ -1,8 +1,10 @@
 # Makefile for UiharuOS
 
 INCLUDE = lib/kernel/ lib/userland/
+LIBINCLUDE = lib/
 CC = gcc
 CFLAGS = -I $(INCLUDE) -m32
+LIBCFLAGS = -I $(LIBINCLUDE) -m32
 KERNEL_ADDR = 0xc0001500
 Ttext = -Ttext $(KERNEL_ADDR)
 
