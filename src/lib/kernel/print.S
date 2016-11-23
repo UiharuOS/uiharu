@@ -3,6 +3,9 @@ RPL0 equ 0
 SELECTOR_VIDEO equ (0x0003<<3) + TI_GDT + RPL0
 
 [bits 32]
+;section .data
+;print_int_buffer dq 0 ; 定义一个8字节的数字到字符的转换缓冲区
+
 section .text
 ;------------------------------------------------
 ; print_str: 打印字符串, 基于print_char
@@ -138,7 +141,7 @@ print_char:
     mov bx, 1920            ; 将光标重置为1920: 最后一行首字符
 
 .set_cursor:
-; 更新光标寄存器为bx值  
+; 更新光标寄存器为bx值
     mov dx, 0x03d4          ; Address Register
     mov al, 0x0e            ; Cursor Register High Location
     out dx, al
@@ -155,3 +158,26 @@ print_char:
 .print_char_done:
     popad                   ; 恢复32位寄存器环境
     ret
+;------------------------------------------------
+; print_int: 打印整数
+; --> 输入: 第一个参数为待打印的数字,
+;           第二个参数为数字的形式[H:16进制, D:10进制, B:2进制]
+; --> 输出: 在屏幕上打印相应的数字
+; --> 比如: print_int(15, 'D') ==> 15
+;           print_int(15, 'H') ==> f
+;           print_int(15, 'B') ==> 1111
+;------------------------------------------------
+;global print_int
+;print_int:
+;    pushad  ; 保存32位的寄存器环境
+;    mov ebp, esp
+;    mov eax, [ebp+36] ; 36 = 32 + 4
+;    mov edx, eax ; edx存放第一个参数的地址
+;    mov edi, 7   ; 指定在print_int_buffer中初始的偏移量
+;    mov ecx, 8   ; 16进制表示32位的位数是8个, cx作为循环变量
+;    mov ebx, print_int_buffer
+;; 将32位数字按照16进制的形式从低位到高位逐个处理
+;; 共处理8个16进制的数字(一个16进制的数字是4位)
+;.16based_4bits:
+;    and edx, 0x0000000F
+;
