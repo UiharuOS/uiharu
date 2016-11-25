@@ -24,15 +24,15 @@ void _hex_print(unsigned int integer) {
     for(i = count; i > 0; i--) {
         _num = _integers[i-1];
         if      (_num == 0)  { print_char('0'); }
-        else if (_num == 1)  { _dec_print(1);   }
-        else if (_num == 2)  { _dec_print(2);   }
-        else if (_num == 3)  { _dec_print(3);   }
-        else if (_num == 4)  { _dec_print(4);   }
-        else if (_num == 5)  { _dec_print(5);   }
-        else if (_num == 6)  { _dec_print(6);   }
-        else if (_num == 7)  { _dec_print(7);   }
-        else if (_num == 8)  { _dec_print(8);   }
-        else if (_num == 9)  { _dec_print(9);   }
+        else if (_num == 1)  { print_char('1'); }
+        else if (_num == 2)  { print_char('2'); }
+        else if (_num == 3)  { print_char('3'); }
+        else if (_num == 4)  { print_char('4'); }
+        else if (_num == 5)  { print_char('5'); }
+        else if (_num == 6)  { print_char('6'); }
+        else if (_num == 7)  { print_char('7'); }
+        else if (_num == 8)  { print_char('8'); }
+        else if (_num == 9)  { print_char('9'); }
         else if (_num == 10) { print_char('a'); }
         else if (_num == 11) { print_char('b'); }
         else if (_num == 12) { print_char('c'); }
