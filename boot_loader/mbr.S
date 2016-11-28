@@ -43,9 +43,9 @@ mov byte [gs:0x07], 0xA4
 mov byte [gs:0x08], 't'
 mov byte [gs:0x09], 0xA4
 
-mov eax, LOADER_START_SECTOR    ; loader在硬盘上的LBA地址: 0x2, 第二块扇区
+mov eax, LOADER_START_SECTOR    ; loader在硬盘上的LBA地址: 0x2, 第3块扇区
 mov bx, LOADER_BASE_ADDR        ; loader在内存中的位置: 0x900
-mov cx, 4                       ; 待读入的扇区数(2KB)
+mov cx, 4                       ; 待读入的扇区数(2048byte=2KB=4*512byte <- loader)
 call rd_disk_m_16               ; call调用函数: 从磁盘中读加载器到内存
 
 ; jmp LOADER_BASE_ADDR          ; 跳转访问加载器(栈)
@@ -63,13 +63,13 @@ rd_disk_m_16:
     mov esi, eax    ; 备份eax
     mov di, cx      ; 备份cx
 ; 读写硬盘:
-; 设置要读取的扇区数
+; step1->设置要读取的扇区数
     mov dx, 0x1f2   ; 0x1f2: primary通道, sector count寄存器
     mov al, cl      ; cl: the least significant 8 bits of the cx
     out dx, al      ; 读取的扇区数
 
     mov eax, esi    ; 恢复eax
-
+; step2->set lba address
     ;lbalow 7~0
     mov dx, 0x1f3
     out dx, al      ; 写入lbalow寄存器
@@ -84,18 +84,17 @@ rd_disk_m_16:
     shr eax, cl
     mov dx, 0x1f5
     out dx, al
-
+; step3->set device register
     ;lba device
     shr eax, cl
-    and al, 0x0f    ; 按位与
     or al, 0xe0     ; 按位或
     mov dx, 0x1f6   ; device寄存器的低4位
     out dx, al
 
     mov dx, 0x1f7   ; 初始化状态寄存器~
-    mov al, 0x20    ; 00100000~ DRDY: 设备就绪等待指令
+    mov al, 0x20    ; 0010 0000~ DRDY: 设备就绪等待指令
     out dx, al      ; 写操作, command寄存器, 硬盘开始工作
-
+; step4->read data
 ; 检测硬盘状态: BSY位
   .not_ready:
     nop             ; 空操作, 类似sleep
