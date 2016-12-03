@@ -1,5 +1,6 @@
 #include "print.h"  // lib/kernel/print.h
 void main(void) {
+    // this is a process
     /* kernel main */
     /*
     print_char('u');
