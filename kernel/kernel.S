@@ -9,7 +9,7 @@ extern print_string
 
 section .data
 intr_str db "interrupt occur!", 0xa, 0
-global intr_entry_table
+global intr_entry_table ; 中断向量数组
 intr_entry_table:
 
 %macro VECTOR 2
@@ -32,9 +32,11 @@ intr%1entry:            ; 每个标号对应着一个中断向量号->中断处�
 
 section .data
     dd intr%1entry      ; 存储中断入口程序地址
+                        ; 这些数据段最终会被合并, 从而
                         ; 构造intr_entry_table数组
 %endmacro
 
+; 33个中断向量
 VECTOR 0x00, ZERO
 VECTOR 0x01, ZERO
 VECTOR 0x02, ZERO
