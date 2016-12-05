@@ -7,6 +7,7 @@ CFLAGS = -I $(INCLUDE) -m32
 LIBCFLAGS = -I $(LIBINCLUDE) -m32
 KERNEL_ADDR = 0xc0001500
 Ttext = -Ttext $(KERNEL_ADDR)
+OUT = build
 
 all: kernel.bin
 

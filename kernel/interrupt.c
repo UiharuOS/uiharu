@@ -22,15 +22,15 @@ struct gate_desc {
     uint8_t dcount;                 // 未使用以及固定为0的字段
     uint8_t attribute;              // 属性位(TYPE, S, DPL, P)
     uint16_t func_offset_high_word; // 中断处理程序在目标代码段内的偏移量的31~16位
-}
+};
 
 // static 函数声明
-static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function);
+void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function);
 static struct gate_desc idt[IDT_DESC_CNT];
 // extern 外部对象声明
 extern intr_handler intr_entry_table[IDT_DESC_CNT];
 
-static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function) {
+void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function) {
     /* make_idt_desc: 创建中断门描述符
      *  - p_gdesc: 指向中断门描述符的指针
      *  - attr: 8位属性位
@@ -81,12 +81,12 @@ static void pic_init(void) {
     // 打开主片上IR0, 接受时钟产生的中断
     // 此时向8259A发送的命令操作属于OCW
     outb (PIC_M_DATA, 0xfe);
-    oubb (PIC_S_DATA, 0xff);
+    outb (PIC_S_DATA, 0xff);
 
     print_string("pic init done!\n");
 }
 
-void idt_init() {
+void idt_init(void) {
     /* idt_init: 初始化中断描述符表
      */
     print_string("idt_init start\n");
