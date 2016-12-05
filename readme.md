@@ -1,7 +1,8 @@
 # Uiharu
 
-> uiharu OS source code
+<hr/>
 
-x86, posix, 32bit
+> uiharu OS source code
+> x86, posix, 32bit
 
 <hr/>
