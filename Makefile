@@ -10,22 +10,22 @@ KERNEL_ADDR = 0xc0001500
 
 all: kernel.bin
 
-kernel.bin: kernel_main 			   \
-            lib_kernel_print 		   \
+kernel.bin: kernel_main                \
+			lib_kernel_print           \
 			lib_kernel_print_string    \
-			lib_kernel_print_int 	   \
-			kernel_init 			   \
-			kernel_interrupt 		   \
+			lib_kernel_print_int       \
+			kernel_init                \
+			kernel_interrupt           \
 			kernel_kernel
 	ld -m elf_i386 $(Ttext) -e main -o \
-		    ${OUT}/kernel.bin   	   \
-		    ${OUT}/main.o              \
-		    ${OUT}/print.o             \
-		    ${OUT}/print_string.o      \
-		    ${OUT}/print_int.o         \
-		    ${OUT}/init.o              \
-		    ${OUT}/interrupt.o         \
-		    ${OUT}/kernel.o
+			${OUT}/kernel.bin          \
+			${OUT}/main.o              \
+			${OUT}/print.o             \
+			${OUT}/print_string.o      \
+			${OUT}/print_int.o         \
+			${OUT}/init.o              \
+			${OUT}/interrupt.o         \
+			${OUT}/kernel.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
