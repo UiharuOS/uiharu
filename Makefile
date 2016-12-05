@@ -1,28 +1,46 @@
 # Makefile for UiharuOS
 
-INCLUDE = lib/kernel/ lib/userland/
-LIBINCLUDE = lib/
 CC = gcc
-CFLAGS = -I $(INCLUDE) -m32
+OUT = build
+Ttext = -Ttext $(KERNEL_ADDR)
+CFLAGS = $(INCLUDE) -m32 -fno-builtin
+INCLUDE = -Ilib/kernel/ -Ilib/ -Ikernel/ -Ilib/userland
 LIBCFLAGS = -I $(LIBINCLUDE) -m32
 KERNEL_ADDR = 0xc0001500
-Ttext = -Ttext $(KERNEL_ADDR)
-OUT = build
 
 all: kernel.bin
 
-kernel.bin: kernel_main.o lib_kernel_print.o lib_kernel_print_string.o lib_kernel_print_int.o
-	ld -m elf_i386 $(Ttext) -e main -o kernel.bin kernel/main.o lib/kernel/print.o lib/kernel/print_string.o lib/kernel/print_int.o
+kernel.bin: kernel_main 			   \
+            lib_kernel_print 		   \
+			lib_kernel_print_string    \
+			lib_kernel_print_int 	   \
+			kernel_init 			   \
+			kernel_interrupt 		   \
+			kernel_kernel
+	ld -m elf_i386 $(Ttext) -e main -o \
+		    ${OUT}/kernel.bin   	   \
+		    ${OUT}/main.o              \
+		    ${OUT}/print.o             \
+		    ${OUT}/print_string.o      \
+		    ${OUT}/print_int.o         \
+		    ${OUT}/init.o              \
+		    ${OUT}/interrupt.o         \
+		    ${OUT}/kernel.o
 
-kernel_main.o: kernel/main.c
-	$(CC) $(CFLAGS) -c -o kernel/main.o kernel/main.c
-
-lib_kernel_print.o: lib/kernel/print.S
-	nasm -f elf32 -o lib/kernel/print.o lib/kernel/print.S
-lib_kernel_print_string.o: lib/kernel/print_string.c
-	$(CC) $(CFLAGS) -c -o lib/kernel/print_string.o lib/kernel/print_string.c
-lib_kernel_print_int.o: lib/kernel/print_int.c
-	$(CC) $(CFLAGS) -c -o lib/kernel/print_int.o lib/kernel/print_int.c
+kernel_main: kernel/main.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
+lib_kernel_print: lib/kernel/print.S
+	nasm -f elf32 -o ${OUT}/print.o lib/kernel/print.S
+lib_kernel_print_string: lib/kernel/print_string.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/print_string.o lib/kernel/print_string.c
+lib_kernel_print_int: lib/kernel/print_int.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/print_int.o lib/kernel/print_int.c
+kernel_init: kernel/init.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/init.o kernel/init.c
+kernel_interrupt: kernel/interrupt.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt.o kernel/interrupt.c
+kernel_kernel: kernel/kernel.S
+	nasm -f elf32 -o ${OUT}/kernel.o kernel/kernel.S
 
 clean:
-	rm **/*.o
+	rm -rf ${OUT}
