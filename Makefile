@@ -4,7 +4,7 @@ CC = gcc
 OUT = build
 Ttext = -Ttext $(KERNEL_ADDR)
 CFLAGS = $(INCLUDE) -m32 -fno-builtin
-INCLUDE = -Ilib/kernel/ -Ilib/ -Ikernel/ -Ilib/userland
+INCLUDE = -Ilib/kernel/ -Ilib/ -Ikernel/
 LIBCFLAGS = -I $(LIBINCLUDE) -m32
 KERNEL_ADDR = 0xc0001500
 
