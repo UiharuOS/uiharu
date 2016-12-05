@@ -9,7 +9,7 @@ extern print_string
 
 section .data
 intr_str db "interrupt occur!", 0xa, 0
-global intr_entry_table ; 中断向量数组
+global intr_entry_table ; 中断向量数组(向量号下标,对应着一段中断处理例程)
 intr_entry_table:
 
 %macro VECTOR 2
@@ -22,7 +22,7 @@ intr%1entry:            ; 每个标号对应着一个中断向量号->中断处�
     add esp, 4          ; 跳过参数(2个参数)
 
     ; 如果是从[从片]上进入的中断, 除了往[从片]上发送EOI外, 还要往[主片]上发送EOI
-    ; 因为CPU接受中断, 返回中断相应, 都是和主片进行交互的
+    ; 因为CPU接受中断, 返回中断响应, 都是和主片进行交互的
     mov al, 0x20        ; EOI命令8259A的OCW2控制
     out 0xa0, al        ; 向从片发送EOI
     out 0x20, al        ; 向主片发送EOI
@@ -36,7 +36,7 @@ section .data
                         ; 构造intr_entry_table数组
 %endmacro
 
-; 33个中断向量
+; 构建33个中断向量处理程序
 VECTOR 0x00, ZERO
 VECTOR 0x01, ZERO
 VECTOR 0x02, ZERO
