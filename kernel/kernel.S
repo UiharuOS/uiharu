@@ -8,7 +8,7 @@
 %define ZERO push 0     ; 如果产生异常,CPU没有把错误码压入栈中,则压入0,保持ESP位置
 
 ; 引用外部对象(c)
-extern print_string
+; extern print_string
 extern idt_table        ; interrupt.c 中定义和初始化的中断处理程序数组
 
 section .data
@@ -35,7 +35,7 @@ intr%1entry:            ; 每个标号对应着一个中断向量号->中断处�
 
     push %1 ; 压入中断向量号, 与中断处理程序对应, 方便异常处理
 
-    call [idt_table] + %1*4] ; 调用idt_table中C版本的中断处理函数, 内存寻址, 调用该内存段上的中断处理程序
+    call [idt_table] + (%1)*4] ; 调用idt_table中C版本的中断处理函数, 内存寻址, 调用该内存段上的中断处理程序
     jmp intr_exit
 
 section .data
@@ -58,36 +58,36 @@ intr_exit:
     iretd
 
 ; 构建33个中断向量处理程序
-VECTOR 0x00, ZERO
-VECTOR 0x01, ZERO
-VECTOR 0x02, ZERO
-VECTOR 0x03, ZERO
-VECTOR 0x04, ZERO
-VECTOR 0x05, ZERO
-VECTOR 0x06, ZERO
-VECTOR 0x07, ZERO
-VECTOR 0x08, ZERO
-VECTOR 0x09, ZERO
-VECTOR 0x0a, ZERO
-VECTOR 0x0b, ZERO
-VECTOR 0x0c, ZERO
-VECTOR 0x0d, ZERO
-VECTOR 0x0e, ZERO
-VECTOR 0x0f, ZERO
-VECTOR 0x10, ZERO
-VECTOR 0x11, ZERO
-VECTOR 0x12, ZERO
-VECTOR 0x13, ZERO
-VECTOR 0x14, ZERO
-VECTOR 0x15, ZERO
-VECTOR 0x16, ZERO
-VECTOR 0x17, ZERO
-VECTOR 0x18, ZERO
-VECTOR 0x19, ZERO
-VECTOR 0x1a, ZERO
-VECTOR 0x1b, ZERO
-VECTOR 0x1c, ZERO
-VECTOR 0x1d, ZERO
-VECTOR 0x1e, ERROR_CODE
-VECTOR 0x1f, ZERO
-VECTOR 0x20, ZERO
+VECTOR 0x00,ZERO
+VECTOR 0x01,ZERO
+VECTOR 0x02,ZERO
+VECTOR 0x03,ZERO
+VECTOR 0x04,ZERO
+VECTOR 0x05,ZERO
+VECTOR 0x06,ZERO
+VECTOR 0x07,ZERO
+VECTOR 0x08,ZERO
+VECTOR 0x09,ZERO
+VECTOR 0x0a,ZERO
+VECTOR 0x0b,ZERO
+VECTOR 0x0c,ZERO
+VECTOR 0x0d,ZERO
+VECTOR 0x0e,ZERO
+VECTOR 0x0f,ZERO
+VECTOR 0x10,ZERO
+VECTOR 0x11,ZERO
+VECTOR 0x12,ZERO
+VECTOR 0x13,ZERO
+VECTOR 0x14,ZERO
+VECTOR 0x15,ZERO
+VECTOR 0x16,ZERO
+VECTOR 0x17,ZERO
+VECTOR 0x18,ZERO
+VECTOR 0x19,ZERO
+VECTOR 0x1a,ZERO
+VECTOR 0x1b,ZERO
+VECTOR 0x1c,ZERO
+VECTOR 0x1d,ZERO
+VECTOR 0x1e,ERROR_CODE
+VECTOR 0x1f,ZERO
+VECTOR 0x20,ZERO
