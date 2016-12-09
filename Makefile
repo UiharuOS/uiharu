@@ -42,5 +42,8 @@ kernel_interrupt: kernel/interrupt.c
 kernel_kernel: kernel/kernel.S
 	nasm -f elf32 -o ${OUT}/kernel.o kernel/kernel.S
 
+build:
+	mkdir ${OUT}
+
 clean:
 	rm -rf ${OUT}
