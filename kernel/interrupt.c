@@ -8,6 +8,7 @@
 #include "stdint.h"  // 定义各种数据类型
 #include "global.h"
 #include "io.h"
+#include "print.h"
 
 #define IDT_DESC_CNT 0x21  // 目前总共支持0x21(33)个中断向量
 #define PIC_M_CTRL 0x20    // PIC主片控制端口号
