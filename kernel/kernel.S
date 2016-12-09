@@ -35,7 +35,7 @@ intr%1entry:            ; 每个标号对应着一个中断向量号->中断处�
 
     push %1 ; 压入中断向量号, 与中断处理程序对应, 方便异常处理
 
-    call [idt_table] + (%1)*4] ; 调用idt_table中C版本的中断处理函数, 内存寻址, 调用该内存段上的中断处理程序
+    call [idt_table + (%1)*4] ; 调用idt_table中C版本的中断处理函数, 内存寻址, 调用该内存段上的中断处理程序
     jmp intr_exit
 
 section .data
