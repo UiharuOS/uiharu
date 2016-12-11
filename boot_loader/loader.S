@@ -333,8 +333,22 @@ kernel_init:
     loop .each_segment  ; 因为如果没有空段, 那就是连续, 一次each_segment调用mem_cpy就可以拷贝完
     ret
 ;-------------------------------------------------------
+; 哈哈哈哈哈哈: uiharuos 数据搬运团队
 ; mem_cpy函数: 从源地址拷贝连续字节到目标地址
-; -> movs[bwd] + rep + c[s]ld 三剑客...➖
+; -> movs(mov string)[bwd] + rep + c[s]ld 内存数据搬运团队
+; -> -> byte:  1字节  \
+; -> -> word:  2字节 --> 数据从哪来, 搬到哪里去?
+; -> -> dword: 4字节  /
+; -> -> -> 将DS:[E]SI指向的地址处相应的字节搬到DS:[E]DI指向的地址处
+; 大量的数据, 则通过rep控制计数器ecx进行连续拷贝
+; 每次搬运都需要更新源地址寄存器, 所以需要cld和sld指令
+; --> cld: clean direction: 设置eflags寄存器中的方向标志位[内存中数据扩展的方向]DF为0,
+; -->      每次rep重复搬运时si,di就自动(CPU做, 不用代码控制)加上相应的搬运数据字节大小
+; --> std: set direction: 设置eflags寄存器中的方向标志位为1
+; -->      每次rep重复搬运时si,di就自动减去相应的搬运数据字节大小,即内存中数据是向下扩展的
+; -> CPU自动增加si, di中会用到的寄存器(不是2者都增加), 只有movs才会同时增加esi和edi
+; -> ins[bwd]: 从端口读入数据到内存->edi的增加(cld)或减少(std)
+; -> outs[bwd]: 从内存中读数据到端口->esi的增加(cld)或减少(std)
 ;-------------------------------------------------------
 mem_cpy:
     cld          ; clean direction, 设置eflags寄存器方向标志位DF为0, 自动增加esi, edi寄存器指向内存地址的值
