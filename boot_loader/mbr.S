@@ -4,11 +4,11 @@
 %include "boot.inc"
 SECTION MBR vstart=0x7c00 ; bios把mbr加载到0x7c00处~31KB
 ; 初始化各寄存器, 段寄存器需要依靠通用寄存器初始化
-  mov ax, cs
-  mov ds, ax
-  mov es, ax
-  mov ss, ax
-  mov fs, ax
+  mov ax, cs     ; code segment: cs寄存器CPU启动的时候就初始化过了0xf000
+  mov ds, ax     ; generally points at segment where variables are defined
+  mov es, ax     ; extra segment register, it's up to a coder to define its usage
+  mov fs, ax     ; fs,gs are commonly used by OS kernels to access thread-specific memory
+  mov ss, ax     ; stack segment register: 把整个实模式下0~0x7c00内存看作一个大栈
   mov sp, 0x7c00 ; 栈指针寄存器指向0x7c00
   mov ax, 0xb800 ; 显卡寄存器地址0xb8000, 实模式寻址会左移16位<-0xb800
   mov gs, ax     ; gs显卡基址, 通过gs可以操作显卡

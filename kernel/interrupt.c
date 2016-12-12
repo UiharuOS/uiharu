@@ -28,7 +28,7 @@ struct gate_desc {
 char* intr_name[IDT_DESC_CNT];         // 保存异常[名字](你的名字把uiharu写完看)
 intr_handler idt_table[IDT_DESC_CNT];  // 中断处理程序数组, 每个中断向量索引一个中断处理程序
 void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function);
-// static 函数声明
+// static 函数
 static struct gate_desc idt[IDT_DESC_CNT];
 // extern 外部对象声明
 extern intr_handler intr_entry_table[IDT_DESC_CNT];
