@@ -17,6 +17,7 @@ void debugger(char* filename,
     print_string("Debugger)-> <FUNCTION> ");  print_string(func);
     print_string("\n");
     print_string("Debugger)-> <CONDITION> "); print_string(condition);
-    print_string("Debugger)-> please fix me, please!\n");
+    print_string("\n");
+    print_string("Debugger)-> please fix me, please!");
     print_string("\n\n\n=============== bug! bug! bug! ===============\n");
 }
