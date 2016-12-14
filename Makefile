@@ -11,9 +11,11 @@ KERNEL_ADDR = 0xc0001500
 all: kernel.bin
 
 kernel.bin: kernel_main                \
+            lib_string                 \
             lib_kernel_print           \
             lib_kernel_print_string    \
             lib_kernel_print_int       \
+            lib_kernel_bitmap          \
             kernel_init                \
             kernel_interrupt           \
             kernel_interrupt_switch    \
@@ -22,6 +24,7 @@ kernel.bin: kernel_main                \
             device_timer
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
+            ${OUT}/string.o            \
             ${OUT}/main.o              \
             ${OUT}/print.o             \
             ${OUT}/print_string.o      \
@@ -31,10 +34,14 @@ kernel.bin: kernel_main                \
             ${OUT}/interrupt_switch.o  \
             ${OUT}/kernel.o            \
             ${OUT}/debug.o             \
-            ${OUT}/timer.o
+            ${OUT}/timer.o             \
+            ${OUT}/bitmap.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
+
+lib_string: lib/string.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/string.o lib/string.c
 
 lib_kernel_print: lib/kernel/print.S
 	nasm -f elf32 -o ${OUT}/print.o lib/kernel/print.S
@@ -42,6 +49,8 @@ lib_kernel_print_string: lib/kernel/print_string.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/print_string.o lib/kernel/print_string.c
 lib_kernel_print_int: lib/kernel/print_int.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/print_int.o lib/kernel/print_int.c
+lib_kernel_bitmap: lib/kernel/bitmap.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/bitmap.o lib/kernel/bitmap.c
 
 kernel_kernel: kernel/kernel.S
 	nasm -f elf32 -o ${OUT}/kernel.o kernel/kernel.S
