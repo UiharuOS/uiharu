@@ -10,6 +10,5 @@ void main(void) {
     print_string("I am kernel\n");
     init_all();
     asm volatile ("sti");  // 打开中断
-    print_string("hq, this is uiharu");
     while(1); // 操作系统就是一个中断(事件)驱动的死循环(loop)
 }

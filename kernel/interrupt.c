@@ -158,6 +158,7 @@ void idt_init(void) {
     print_string("idt_init start\n");
     idt_desc_init();  // 初始化中断描述符
     exception_init(); // 异常名初始化并注册通常的中断处理函数
+    // idt_desc_init();
     pic_init();       // 初始化中断代理芯片(ex:8259A)
     uint64_t idt_operand = (
         (sizeof(idt) - 1) | ((uint64_t)(
