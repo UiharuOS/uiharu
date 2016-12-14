@@ -26,7 +26,7 @@ void memcpy(void* dst, const void* src, uint32_t size) {
     }
 }
 
-int8_t memcmp(const void* a, const void* b, uint32_t size) {
+int memcmp(const void* a, const void* b, uint32_t size) {
     /* memcmp: 比较a, b起始处size字节的数据是否相等
      *   - 若相等        : 返回0
      *   - 若asize>bsize : 返回1
@@ -96,7 +96,7 @@ int8_t* strrchr(const int8_t* str, const uint8_t ch) {
      */
     ASSERT(str != NULL);
     const int8_t* last_char = NULL;
-    while (*+str) {
+    while (*++str) {
         if (*str == ch) {
             last_char = str;
         }

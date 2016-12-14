@@ -1,9 +1,12 @@
 #ifndef LIB_STRING_H
 #define LIB_STRING_H
 
+#define NULL ((void*) 0)
+#include "stdint.h"
+
 void memset(void* dst, uint8_t value, uint32_t size);
 void memcpy(void* dst, const void* src, uint32_t size);
-uint8_t memcmp(const void* a, const void* b, uint32_t size);
+int memcmp(const void* a, const void* b, uint32_t size);
 
 int8_t* strcpy(int8_t* dst, const int8_t* src);
 uint32_t strlen(const int8_t* str);

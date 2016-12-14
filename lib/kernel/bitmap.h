@@ -2,6 +2,7 @@
 #define LIB_KERNEL_BITMAP_H
 
 #include "global.h"
+#include "boolean.h"
 
 /* 用于位图中的&逐位判断*/
 #define BITMAP_MASK 1
@@ -14,7 +15,7 @@ struct bitmap {
 };
 
 void bitmap_init(struct bitmap* btmp);
-bool bitmap_scan_test(struct bitmap* btmp, uint32_t bit_idx);
+boolean bitmap_scan_test(struct bitmap* btmp, uint32_t bit_idx);
 int bitmap_scan(struct bitmap* btmp, uint32_t cnt);
 void bitmap_set(struct bitmap* btmp, uint32_t bit_idx, int8_t value);
 

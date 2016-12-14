@@ -12,7 +12,7 @@ void bitmap_init(struct bitmap* btmp) {
     memset(btmp->bits, 0, btmp->btmp_bytes_len);
 }
 
-bool bitmap_scan_test(struct bitmap* btmp, uint32_t bit_idx) {
+boolean bitmap_scan_test(struct bitmap* btmp, uint32_t bit_idx) {
     /* bitmap_scan_test: 判断bit_idx位是否为1
      *   - 若是: return true
      *   - 否则: return false
