@@ -17,6 +17,7 @@ kernel.bin: kernel_main                \
             kernel_init                \
             kernel_interrupt           \
             kernel_kernel              \
+			kernel_debug               \
             device_timer
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
@@ -27,22 +28,28 @@ kernel.bin: kernel_main                \
             ${OUT}/init.o              \
             ${OUT}/interrupt.o         \
             ${OUT}/kernel.o            \
+			${OUT}/debug.o             \
             ${OUT}/timer.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
+
 lib_kernel_print: lib/kernel/print.S
 	nasm -f elf32 -o ${OUT}/print.o lib/kernel/print.S
 lib_kernel_print_string: lib/kernel/print_string.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/print_string.o lib/kernel/print_string.c
 lib_kernel_print_int: lib/kernel/print_int.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/print_int.o lib/kernel/print_int.c
+
+kernel_kernel: kernel/kernel.S
+	nasm -f elf32 -o ${OUT}/kernel.o kernel/kernel.S
 kernel_init: kernel/init.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/init.o kernel/init.c
 kernel_interrupt: kernel/interrupt.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt.o kernel/interrupt.c
-kernel_kernel: kernel/kernel.S
-	nasm -f elf32 -o ${OUT}/kernel.o kernel/kernel.S
+kernel_debug: kernel/debug.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/debug.o kernel/debug.c
+	
 device_timer: device/timer.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/timer.o device/timer.c
 
