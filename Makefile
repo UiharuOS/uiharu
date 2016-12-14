@@ -28,7 +28,7 @@ kernel.bin: kernel_main                \
             ${OUT}/init.o              \
             ${OUT}/interrupt.o         \
             ${OUT}/kernel.o            \
-			${OUT}/debug.o             \
+            ${OUT}/debug.o             \
             ${OUT}/timer.o
 
 kernel_main: kernel/main.c
