@@ -8,7 +8,7 @@ LOADER_STACK_TOP equ LOADER_BASE_ADDR
 ; -> 代码段, 数据段, 显存段
 ; -> GDT_BASE:00000000000000000000000000000000000000000000000000000000000 = hi:0x00000000, lo:0x00000000
 ; -> CODE_DESC:|00000000|1100|1111|1|00|1|1000|00000000|000000000000001111111111111111| = hi:0x00CF9800 lo:0x0000FFFF
-; -> DATA_STACK_DESC: 
+; -> DATA_STACK_DESC:
 ; -> DESC_LIMIT_VIDEO: (0x0007+ 0x0000)*4k = 0x00007*4k = 0x00007FFF
 ;-------------------------------------------------------
 GDT_BASE: dd 0x00000000
@@ -23,8 +23,8 @@ GDT_SIZE equ $ - GDT_BASE  ; 32字节? 0x20
 GDT_LIMIT equ GDT_SIZE - 1 ; 0x1F
 times 60 dq 0  ; 此处预留60个描述符空位, 先用0占位(还没有被规划为gdt)
 SELECTOR_CODE equ (0x0001<<3) + TI_GDT + RPL0  ; 0特权级
-SELECTOR_DATA equ (0x0002<<3) + TI_GDT + RPL0
-SELECTOR_VIDEO equ (0x0003<<3)+ TI_GDT + RPL0
+SELECTOR_DATA equ (0x0002<<3) + TI_GDT + RPL0  ; 0x0002000
+SELECTOR_VIDEO equ (0x0003<<3)+ TI_GDT + RPL0  ; 1, 2, 3就是索引, 左移3位是为构造腾出空间
 ; 保存检测出来的内存大小
 ; 当前偏移文件头(60+4)*8byte=512=0x200字节
 ; loader被加载进内存的地址是0x900
@@ -144,22 +144,13 @@ loader_start:
     mov [total_mem_bytes], edx  ; 以byte为单位的内存总量(✅ )
 
 ;-------------------------------------------------------
-; bios 0x10中断 打印字符串
-;-------------------------------------------------------
-    ; mov sp, LOADER_BASE_ADDR
-    ; mov bp, loadermsg
-    ; mov cx, 15
-    ; mov ax, 0x1301
-    ; mov bx, 0x001f
-    ; mov dx, 0x0C1F
-    ; int 0x10
-;-------------------------------------------------------
 ; 准备进入保护模式
 ; -> 1 打开A20
 ; -> 2 加载gdt
 ; -> 3 将cr0的pe位置为1
 ;-------------------------------------------------------
     ; 1 打开A20地址总线
+    ; 端口0x92-A20gate,A20 gate第1位置1就可以打开A20地址总线,关闭地址回绕
     in al, 0x92
     or al, 0000_0010b
     out 0x92, al
@@ -172,22 +163,27 @@ loader_start:
 
 jmp dword SELECTOR_CODE:p_mode_start  ; 刷新CPU流水线
 ; 考虑到下面的部分指令取指和译码可能是在16位下完成的, 所以刷新流水线
+; CPU多级流水线
 
 .error_hlt:
     hlt  ; 出错则挂起
 
 [bits 32]
 p_mode_start:
+    ; 进入了32位保护模式
+    ; 再次初始化栈寄存器(刚进入实模式MBR也初始化过一次, 吼吼吼)
+    ; 不过这次不是用cs初始化, 而是用构造好的选择子初始化
     mov ax, SELECTOR_DATA  ; ds, es, ss被初始化为相同的选择子, 指向相同的数据段
     mov ds, ax
     mov es, ax
     mov ss, ax
-    mov esp, LOADER_STACK_TOP
+    mov esp, LOADER_STACK_TOP ; 开始->栈指针指向栈基址
     mov ax, SELECTOR_VIDEO
     mov gs, ax
 ;-------------------------------------------------------
 ; 加载内核
-; -> 把内核从硬盘取出放到内存缓冲区
+; -> 进入保护模式, 就可以放心的加载内核了
+; -> 把内核kernel.bin从硬盘取出放到内存中
 ;-------------------------------------------------------
     mov eax, KERNEL_START_SECTOR  ; kernel.bin所在的扇区号
     mov ebx, KERNEL_BIN_BASE_ADDR ; 从磁盘读出后, 写入到该内存地址
