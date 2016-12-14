@@ -17,7 +17,7 @@ kernel.bin: kernel_main                \
             kernel_init                \
             kernel_interrupt           \
             kernel_kernel              \
-			kernel_debug               \
+            kernel_debug               \
             device_timer
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \

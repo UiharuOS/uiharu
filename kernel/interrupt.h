@@ -12,7 +12,7 @@ enum intr_status {  // 枚举体
 };
 
 enum intr_status intr_enable(void);
-enum intr_status intr_disabel(void);
+enum intr_status intr_disable(void);
 enum intr_status intr_set_status(enum intr_status status);
 enum intr_status inter_get_status(void);
 
