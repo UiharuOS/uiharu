@@ -16,6 +16,7 @@ kernel.bin: kernel_main                \
             lib_kernel_print_int       \
             kernel_init                \
             kernel_interrupt           \
+            kernel_interrupt_switch    \
             kernel_kernel              \
             kernel_debug               \
             device_timer
@@ -27,6 +28,7 @@ kernel.bin: kernel_main                \
             ${OUT}/print_int.o         \
             ${OUT}/init.o              \
             ${OUT}/interrupt.o         \
+            ${OUT}/interrupt_switch.o  \
             ${OUT}/kernel.o            \
             ${OUT}/debug.o             \
             ${OUT}/timer.o
@@ -47,6 +49,8 @@ kernel_init: kernel/init.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/init.o kernel/init.c
 kernel_interrupt: kernel/interrupt.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt.o kernel/interrupt.c
+kernel_interrupt_switch: kernel/interrupt_switch.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt_switch.o kernel/interrupt_switch.c
 kernel_debug: kernel/debug.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/debug.o kernel/debug.c
 	
