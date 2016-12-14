@@ -42,7 +42,7 @@ enum intr_status intr_set_status(enum intr_status status) {
      *   - status: 待设置的中断状态
      */
     // 中断状态比较简单, 不是开就是关
-    return status & INTR_ON ? intr_enable() : intr_disable()
+    return status & INTR_ON ? intr_enable() : intr_disable();
 }
 
 enum intr_status intr_get_status() {
