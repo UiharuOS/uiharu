@@ -20,4 +20,6 @@ void debugger(char* filename,
     print_string("\n");
     print_string("Debugger)-> please fix me, please!");
     print_string("\n\n\n=============== bug! bug! bug! ===============\n");
+
+    while(1); // 挂起, 内核都有bug了还干什么!
 }
