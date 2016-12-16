@@ -25,7 +25,6 @@ kernel.bin: kernel_main                \
 			kernel_memory
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
-            ${OUT}/string.o            \
             ${OUT}/main.o              \
             ${OUT}/print.o             \
             ${OUT}/print_string.o      \
@@ -36,8 +35,9 @@ kernel.bin: kernel_main                \
             ${OUT}/kernel.o            \
             ${OUT}/debug.o             \
             ${OUT}/timer.o             \
+            ${OUT}/string.o            \
             ${OUT}/bitmap.o            \
-			${OUT}/memory.o
+            ${OUT}/memory.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c

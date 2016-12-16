@@ -27,7 +27,7 @@ static void mem_pool_init(uint32_t all_mem) {
      *   all_mem: 机器物理内存总容量大小
      *   总容量已经在loader中获取了, 存储在total_mem_bytes(32位0xb00)中
      */
-    print_string("--> mem_pool_init start\n");
+    print_string("Info)--> mem_pool_init start\n");
     // 总共初始化了256个页表
     // 分布在物理内存低端1MB以上, "第1个"页表是页目录表(4KB, 第1023个页目录项指向于此)
     uint32_t page_table_size = PG_SIZE * 256;
@@ -56,15 +56,15 @@ static void mem_pool_init(uint32_t all_mem) {
     user_pool.pool_bitmap.bits =(void*)(MEM_BITMAP_BASE + kernel_bitmap_length);
 
     /* 输出内存池信息 */
-    print_string("----> kernel_pool_bitmap_start:");
+    print_string("Info)----> kernel_pool_bitmap_start:");
     print_int((int)kernel_pool.pool_bitmap.bits, 'H');
-    print_string("\n----> kernel_pool_phyaddr_start: ");
+    print_string("\nInfo)----> kernel_pool_phyaddr_start: ");
     print_int(kernel_pool.phy_addr_start, 'H');
-    print_string("\n----> user_pool_bitmap_start: ");
+    print_string("\nInfo)----> user_pool_bitmap_start: ");
     print_int((int)user_pool.pool_bitmap.bits, 'H');
-    print_string("\n----> user_pool_phyaddr_start: ");
+    print_string("\nInfo)----> user_pool_phyaddr_start: ");
     print_int(user_pool.phy_addr_start, 'H');
-    print_int("\n");
+    print_string("\n");
 
     /* 初始化位图:将位图置0 */
     bitmap_init(&kernel_pool.pool_bitmap);
@@ -77,17 +77,17 @@ static void mem_pool_init(uint32_t all_mem) {
 
     kernel_vaddr.vaddr_start = K_HEAP_START;
     bitmap_init(&kernel_vaddr.vaddr_bitmap);
-    print_string("--> mem_pool_init done\n");
+    print_string("Info)--> mem_pool_init done\n");
 
 }
 
 void mem_init() {
     /* mem_init: 内存管理系统初始化 */
-    print_string("-> mem_init start\n");
+    print_string("Info)-> mem_init start\n");
     // 0xb00是loader统计机器物理内存(bios:0x15:e820)结果变量的起始存储位置
     // 该变量定义dd: 32字节.
     // 所以把该内存转换为指向相应内存大小的指针再用*取值就可以拿到该变量的值
     uint32_t mem_bytes_total = (*(uint32_t*)(0xb00)); // amazing!
     mem_pool_init(mem_bytes_total);
-    print_string("<- mem_init done\n");
+    print_string("Info)-> mem_init done\n");
 }

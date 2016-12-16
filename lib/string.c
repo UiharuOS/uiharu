@@ -7,7 +7,7 @@ void memset(void* dst, uint8_t value, uint32_t size) {
      *   - 用于连续内存的初始化, 比如清0
      *   - 比汇编做清0, 不知道方便到哪里去了😄
      */
-    ASSERT(dst != NULL & size != 0);
+    ASSERT(dst != NULL && size != 0);
     uint8_t* _dst = (uint8_t*)dst;
     while (size-- > 0) {
         *_dst++ = value;

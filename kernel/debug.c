@@ -8,7 +8,7 @@ void debugger(char* filename,
               const char* condition) {
     /* uiharuos god debugger:) */
     intr_disable();  // 关中断, 避免其它信息干扰
-    print_string("\n\n\n=============== bug! bug! bug! ===============\n");
+    print_string("\n=============== bug! bug! bug! ===============\n");
     print_string("Debugger)-> oh,god, you stepped on the bug!\n");
     print_string("Debugger)-> <FILENAME> ");  print_string(filename);
     print_string("\n");
@@ -19,7 +19,7 @@ void debugger(char* filename,
     print_string("Debugger)-> <CONDITION> "); print_string(condition);
     print_string("\n");
     print_string("Debugger)-> please fix me, please!");
-    print_string("\n\n\n=============== bug! bug! bug! ===============\n");
+    print_string("\n=============== bug! bug! bug! ===============\n");
 
     while(1); // 挂起, 内核都有bug了还干什么!
 }
