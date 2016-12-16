@@ -24,22 +24,25 @@ boolean bitmap_scan_test(struct bitmap* btmp, uint32_t bit_idx) {
 }
 
 int bitmap_scan(struct bitmap* btmp, uint32_t cnt) {
-    /* bitmap_scan: 在位图中连续申请cnt个位
+    /* bitmap_scan: 在位图btmp中连续申请cnt个位(页)
      *   - 成功: 返回起始位的位下标(可以找到连续cnt个空闲位)
      *   - 失败: 返回-1
      *   一开始逐字节遍历, 增加跨度, 方便后续查找, 否则退化为位查找
      */
     uint32_t idx_byte = 0;  // 纪录空闲位所在的字节(先定位到字节)
+    // bits[idx_byte] -> bits+idx_byte
     while (( btmp->bits[idx_byte]==0xff) && (idx_byte < btmp->btmp_bytes_len)) {
+        // 逐字节查找
         idx_byte++;
     }
     if (idx_byte == btmp->btmp_bytes_len) {
         return -1; // 内存池中已无空闲内存
     }
     ASSERT(idx_byte < btmp->btmp_bytes_len);  // 无空闲内存挂起
-    int idx_bit = 0;
+    int32_t idx_bit = 0;
     while ((uint8_t)(BITMAP_MASK << idx_bit) & btmp->bits[idx_byte]) {
         // 在位图数组某一字节逐位寻找空闲位(定位到位)
+        // 按位&, 判断该位是否为1, 为true表示该位已经分配, 继续寻找
         idx_bit++;
     }
     int bit_idx_start = idx_byte*8 + idx_bit; // 位图中第一个空闲位的[位索引]
@@ -48,7 +51,7 @@ int bitmap_scan(struct bitmap* btmp, uint32_t cnt) {
         return bit_idx_start;
     }
 
-    uint32_t bit_left = (btmp->btmp_bytes_len*8-bit_idx_start); // 位图中剩余位的个数
+    uint32_t bit_left = (btmp->btmp_bytes_len*8-bit_idx_start); // 位图中剩余位的个数(里面可能会有连续的空闲位)
     uint32_t next_bit = bit_idx_start + 1;
     uint32_t count = 1;
     bit_idx_start = -1;
