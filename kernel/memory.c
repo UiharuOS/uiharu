@@ -37,7 +37,7 @@ static void mem_pool_init(uint32_t all_mem) {
     uint16_t kernel_free_pages = all_free_pages / 2; // 物理内存空间采用对半分的策略
     uint16_t user_free_pages = all_free_pages - kernel_free_pages;
     uint32_t kernel_bitmap_length = kernel_free_pages / 8; // 字节长度
-    uint32_t user_bitmap_length = user_free_pages / 8;  
+    uint32_t user_bitmap_length = user_free_pages / 8;
     uint32_t kernel_phyaddr_start = used_mem;  // ?
     uint32_t user_phyaddr_start = kernel_phyaddr_start + kernel_free_pages*PG_SIZE;
 
