@@ -4,23 +4,23 @@ CC = gcc
 OUT = build
 Ttext = -Ttext $(KERNEL_ADDR)
 CFLAGS = $(INCLUDE) -m32 -fno-builtin
-INCLUDE = -Ilib/kernel/ -Ilib/ -Ikernel/ -Idevice/
+INCLUDE = -Ilib/ -Ikernel/ -Ikernel/lib/ -Idevice/ -Iacademy-city/
 LIBCFLAGS = -I $(LIBINCLUDE) -m32
 KERNEL_ADDR = 0xc0001500
 
 all: kernel.bin
 
 kernel.bin: kernel_main                \
-            lib_string                 \
-            lib_kernel_print           \
-            lib_kernel_print_string    \
-            lib_kernel_print_int       \
-            lib_kernel_bitmap          \
+            kernel_lib_print           \
+            kernel_lib_print_string    \
+            kernel_lib_print_int       \
+            kernel_lib_bitmap          \
             kernel_init                \
             kernel_interrupt           \
             kernel_interrupt_switch    \
             kernel_kernel              \
             kernel_debug               \
+            lib_string                 \
             device_timer
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
@@ -39,21 +39,16 @@ kernel.bin: kernel_main                \
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
-
-lib_string: lib/string.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/string.o lib/string.c
-
-lib_kernel_print: lib/kernel/print.S
-	nasm -f elf32 -o ${OUT}/print.o lib/kernel/print.S
-lib_kernel_print_string: lib/kernel/print_string.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/print_string.o lib/kernel/print_string.c
-lib_kernel_print_int: lib/kernel/print_int.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/print_int.o lib/kernel/print_int.c
-lib_kernel_bitmap: lib/kernel/bitmap.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/bitmap.o lib/kernel/bitmap.c
-
+kernel_lib_print: kernel/lib/print.S
+	nasm -f elf32 -o ${OUT}/print.o kernel/lib/print.S
 kernel_kernel: kernel/kernel.S
 	nasm -f elf32 -o ${OUT}/kernel.o kernel/kernel.S
+kernel_lib_print_string: kernel/lib/print_string.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/print_string.o kernel/lib/print_string.c
+kernel_lib_print_int: kernel/lib/print_int.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/print_int.o kernel/lib/print_int.c
+kernel_lib_bitmap: kernel/lib/bitmap.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/bitmap.o kernel/lib/bitmap.c
 kernel_init: kernel/init.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/init.o kernel/init.c
 kernel_interrupt: kernel/interrupt.c
@@ -62,6 +57,9 @@ kernel_interrupt_switch: kernel/interrupt_switch.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt_switch.o kernel/interrupt_switch.c
 kernel_debug: kernel/debug.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/debug.o kernel/debug.c
+
+lib_string: lib/string.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/string.o lib/string.c
 	
 device_timer: device/timer.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/timer.o device/timer.c
