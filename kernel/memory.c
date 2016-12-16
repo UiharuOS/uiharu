@@ -61,7 +61,7 @@ static void mem_pool_init(uint32_t all_mem) {
     print_string("\n----> kernel_pool_phyaddr_start: ");
     print_int(kernel_pool.phy_addr_start, 'H');
     print_string("\n----> user_pool_bitmap_start: ");
-    print_int((int)user_pool.pool_bitmap.bits, 'H')
+    print_int((int)user_pool.pool_bitmap.bits, 'H');
     print_string("\n----> user_pool_phyaddr_start: ");
     print_int(user_pool.phy_addr_start, 'H');
     print_int("\n");
