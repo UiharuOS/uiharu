@@ -21,7 +21,8 @@ kernel.bin: kernel_main                \
             kernel_kernel              \
             kernel_debug               \
             lib_string                 \
-            device_timer
+            device_timer               \
+			kernel_memory
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
             ${OUT}/string.o            \
@@ -35,7 +36,8 @@ kernel.bin: kernel_main                \
             ${OUT}/kernel.o            \
             ${OUT}/debug.o             \
             ${OUT}/timer.o             \
-            ${OUT}/bitmap.o
+            ${OUT}/bitmap.o            \
+			${OUT}/memory.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
@@ -57,6 +59,8 @@ kernel_interrupt_switch: kernel/interrupt_switch.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt_switch.o kernel/interrupt_switch.c
 kernel_debug: kernel/debug.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/debug.o kernel/debug.c
+kernel_memory: kernel/memory.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/memory.o kernel/memory.c
 
 lib_string: lib/string.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/string.o lib/string.c
