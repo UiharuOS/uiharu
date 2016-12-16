@@ -238,7 +238,6 @@ enter_kernel:
     mov esp, 0xc009f000    ; 初始化栈顶到0xc009f000
     jmp KERNEL_ENTRY_POINT ; jmp进入内核
 
-    jmp $
 ;-------------------------------------------------------
 ; rd_disk_m_32: 硬盘内核文件读取
 ; -> eax: kernel.bin所在的扇区号

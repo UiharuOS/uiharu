@@ -36,12 +36,12 @@ void timer_init() {
     /* timer_init
      *  初始化8253寄存器
      */
-    print_string("intel 8253 timer init start\n");
+    print_string("Info)-> intel 8253 timer init start\n");
     frequency_set(COUNTER0_PORT,
                   COUNTER0_NUM,
                   READ_WRITE_LATCH,
                   COUNTER0_MODE,
                   COUNTER0_VALUE
                   /*BCD默认为0, 使用2进制计数, 0代表65536*/);
-    print_string("intel 8253 timer init done\n");
+    print_string("Info)-> intel 8253 timer init done\n");
 }

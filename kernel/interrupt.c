@@ -54,7 +54,7 @@ static void idt_desc_init(void) {
         // intr_entry_table[i] 第i个中断向量对应的中断处理例程
         make_idt_desc(&idt[i], IDT_DESC_ATTR_DPL0, intr_entry_table[i]);
     }
-    print_string("idt desc init done\n");
+    print_string("Info)--> idt desc init done\n");
 }
 
 static void general_intr_handler(uint8_t vec_nr) {
@@ -102,6 +102,8 @@ static void exception_init(void) {
     intr_name[17]= "#AC Alignment Check Exception";
     intr_name[18]= "#MC Machine-check Exception";
     intr_name[19]= "#XM SIMD Floating-Point Exception";
+    // show message
+    print_string("Info)--> exception_init_done\n");
 }
 
 static void pic_init(void) {
@@ -149,13 +151,13 @@ static void pic_init(void) {
     outb (PIC_M_DATA, 0xfe);
     outb (PIC_S_DATA, 0xff);
 
-    print_string("pic init done!\n");
+    print_string("Info)--> pic init done!\n");
 }
 
 void idt_init(void) {
     /* idt_init: 初始化中断描述符表
      */
-    print_string("idt_init start\n");
+    print_string("Info)-> idt_init start\n");
     idt_desc_init();  // 初始化中断描述符
     exception_init(); // 异常名初始化并注册通常的中断处理函数
     // idt_desc_init();
@@ -170,5 +172,5 @@ void idt_init(void) {
         :
         : "m" (idt_operand)
     );  // 加载idt
-    print_string("idt init done\n");
+    print_string("Info)-> idt init done\n");
 }
