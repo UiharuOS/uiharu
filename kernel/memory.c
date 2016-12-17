@@ -111,12 +111,12 @@ static void* vaddr_get(enum pool_flags pf, uint32_t pg_cnt) {
     uint32_t cnt = 0;
     if (pf == PF_KERNEL) {
         // bit_idx_start 位图中连续分配pg_cnt个页的起始位的位下标
-        bit_idx_start = bitmap_scan(&kernel_vaddr.vadder_bitmap, pg_cnt);
+        bit_idx_start = bitmap_scan(&kernel_vaddr.vaddr_bitmap, pg_cnt);
         if (bit_idx_start == -1) {
             return NULL;  // 无连续空闲内存可以分配
         }
         while (cnt < pg_cnt) {
-            bitmap_set(&kernel_vaddr.vadder_bitmap, bit_idx_start+cnt++, 1); // 全部置为1,即已经分配出去了
+            bitmap_set(&kernel_vaddr.vaddr_bitmap, bit_idx_start+cnt++, 1); // 全部置为1,即已经分配出去了
         }
         // 将bit_idx_start转换为虚拟地址
         vaddr_start = kernel_vaddr.vaddr_start + bit_idx_start*PG_SIZE;
@@ -167,7 +167,7 @@ static void page_table_add(void* vaddr, void* page_phyaddr) {
             // pte中存放的是物理页的起始物理地址, 与物理地址参数建立映射
             *pte = (_page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
         } else { // 该物理页已经被分配了
-            debugger("the page pte point to, has been assigned!");
+            DEBUGGER("the page pte point to, has been assigned!");
             *pte = (_page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);  // 覆盖
         }
     } else { // 页表不存在, 虚拟地址索引范围超过了loader创建的页表范围, 创建新的页表
@@ -189,7 +189,7 @@ void* malloc_page(enum pool_flags pf, uint32_t pg_cnt) {
      * - 通过page_table_add将虚拟地址和物理页地址在页表中完成映射
      */
     void* vaddr_start = vaddr_get(pf, pg_cnt);
-    if (vaddr_start === NULL) {
+    if (vaddr_start == NULL) {
         return NULL;
     }
     uint32_t vaddr = (uint32_t)vaddr_start;
