@@ -2,11 +2,11 @@
 
 CC = gcc
 OUT = build
-Ttext = -Ttext $(KERNEL_ADDR)
-CFLAGS = $(INCLUDE) -m32 -fno-builtin
-INCLUDE = -Ilib/ -Ikernel/ -Ikernel/lib/ -Idevice/ -Iacademy-city/
-LIBCFLAGS = -I $(LIBINCLUDE) -m32
 KERNEL_ADDR = 0xc0001500
+Ttext = -Ttext $(KERNEL_ADDR)
+LIBCFLAGS = -I $(LIBINCLUDE) -m32
+CFLAGS = $(INCLUDE) -m32 -fno-builtin
+INCLUDE = -Ilib/ -Ikernel/ -Ikernel/lib/ -Ikernel/device/ -Iacademy-city/
 
 all: kernel.bin
 
@@ -20,9 +20,9 @@ kernel.bin: kernel_main                \
             kernel_interrupt_switch    \
             kernel_kernel              \
             kernel_debug               \
-            lib_string                 \
-            device_timer               \
-			kernel_memory
+            kernel_device_timer        \
+            kernel_memory              \
+            lib_string
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
             ${OUT}/main.o              \
@@ -61,12 +61,11 @@ kernel_debug: kernel/debug.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/debug.o kernel/debug.c
 kernel_memory: kernel/memory.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/memory.o kernel/memory.c
+kernel_device_timer: kernel/device/timer.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/timer.o kernel/device/timer.c
 
 lib_string: lib/string.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/string.o lib/string.c
-	
-device_timer: device/timer.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/timer.o device/timer.c
 
 build:
 	mkdir ${OUT}
