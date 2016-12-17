@@ -54,14 +54,12 @@ static void mem_pool_init(uint32_t all_mem) {
     kernel_pool.phy_addr_start = kernel_phyaddr_start;
     kernel_pool.pool_size = kernel_free_pages*PG_SIZE;
     kernel_pool.pool_bitmap.btmp_bytes_len = kernel_bitmap_length;
+    kernel_pool.pool_bitmap.bits = (void*)MEM_BITMAP_BASE;
+
     /* 初始化用户物理内存池 */
     user_pool.phy_addr_start = user_phyaddr_start;
     user_pool.pool_size = user_free_pages*PG_SIZE;
     user_pool.pool_bitmap.btmp_bytes_len = user_bitmap_length;
-
-    /* 初始化内核物理内存池位图指针 */
-    kernel_pool.pool_bitmap.bits = (void*)MEM_BITMAP_BASE;
-    /* 初始化用户物理内存池位图指针 */
     user_pool.pool_bitmap.bits =(void*)(MEM_BITMAP_BASE + kernel_bitmap_length);
 
     /* 输出内存池信息 */
