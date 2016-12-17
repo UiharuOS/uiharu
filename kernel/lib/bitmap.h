@@ -1,5 +1,5 @@
-#ifndef LIB_KERNEL_BITMAP_H
-#define LIB_KERNEL_BITMAP_H
+#ifndef KERNEL_LIB_BITMAP_H
+#define KERNEL_LIB_BITMAP_H
 
 #include "global.h"
 #include "boolean.h"

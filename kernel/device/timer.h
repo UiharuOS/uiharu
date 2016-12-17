@@ -1,5 +1,5 @@
-#ifndef DEVICE_TIMER_H
-#define DEVICE_TIMER_H
+#ifndef KERNEL_DEVICE_TIMER_H
+#define KERNEL_DEVICE_TIMER_H
 
 void time_init();
 

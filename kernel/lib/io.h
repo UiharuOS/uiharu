@@ -1,5 +1,5 @@
-#ifndef _LIB_IO_H
-#define _LIB_IO_H
+#ifndef KERNEL_LIB_IO_H
+#define KERNEL_LIB_IO_H
 #include "stdint.h"
 
 static inline void outb(uint16_t port, uint8_t data) {
