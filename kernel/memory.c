@@ -79,9 +79,7 @@ static void mem_pool_init(uint32_t all_mem) {
 
     /* 初始化内核虚拟地址位图,按实际物理内存大小生成数组 */
     kernel_vaddr.vaddr_bitmap.btmp_bytes_len = kernel_bitmap_length;
-
     kernel_vaddr.vaddr_bitmap.bits = (void*)(MEM_BITMAP_BASE + kernel_bitmap_length + user_bitmap_length);
-
     kernel_vaddr.vaddr_start = K_HEAP_START;
     bitmap_init(&kernel_vaddr.vaddr_bitmap);
     print_string("Info)--> mem_pool_init done\n");
