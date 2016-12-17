@@ -205,3 +205,13 @@ void* malloc_page(enum pool_flags pf, uint32_t pg_cnt) {
     }
     return vaddr_start;  // 返回虚拟地址, 程序中使用的是逻辑上的虚拟地址
 }
+
+void* get_kernel_pages(uint32_t pg_cnt) {
+    /* get_kernel_pages: 从内核物理内存池中申请页内存
+     */
+    void* vaddr = malloc_page(PF_KERNEL, pg_cnt);
+    if (vaddr != NULL) {
+        memset(vaddr, 0, pg_cnt*PG_SIZE);
+    }
+    return vaddr;
+}
