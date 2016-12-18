@@ -28,14 +28,16 @@ void thread_create(struct task_struct* pthread, thread_func function, void* func
 
 void init_thread(struct task_struct* pthread, char* name, int priority) {
     /* int_thread: 初始化进程(线程)的基本信息 */
-    memset(pthread, 0, sizeof(*pthread));
+    // memset(pthread, 0, sizeof(*pthread)); // 物理页清0, 避免分配到脏页; get_kernel_pages已经清0过了
     strcpy(pthread->name, name);
     pthread->status = TASK_RUNNING;
     pthread->priority = priority;
     // self_kstack是该线程在内核态下使用的栈顶地址
     // uiharu进程PCB占连续的一个物理页, 线程栈位于PCB顶部位置(高地址)
+    // 所以是[起始虚拟地址+PG_SIZE], (uint32_t)pthread就是pthread pcb的起始地址,
+    // a little trick:)
     pthread->self_kstack = (uint32_t*)((uint32_t)pthread + PG_SIZE);
-    pthread->stack_magic = 0x19960411;
+    pthread->stack_magic = 0x19960411;  // 这是一个神奇的数字, 用作魔数
 }
 
 struct task_struct* thread_start(char* name,           \
@@ -44,7 +46,9 @@ struct task_struct* thread_start(char* name,           \
                                  void* func_args) {
     /* thread_start: 创建一个指定优先级的线程 */
     // 所有进程(kernel/user)的PCB都由操作系统调度维护, 位于内核空间
-    struct task_struct* thread = get_kernel_pages(1);  // 在内核物理内存池中申请一个物理页...
+    // 在内核物理内存池中申请一页内存分配给该线程(所属进程)的PCB
+    // thread存储的是该页内存的起始虚拟地址
+    struct task_struct* thread = get_kernel_pages(1);
     init_thread(thread, name, priority);
     thread_create(thread, function, func_args);
 

@@ -87,13 +87,13 @@ rd_disk_m_16:
 ; step3->set device register
     ;lba device
     shr eax, cl
-    or al, 0xe0     ; 按位或
+    or al, 0xe0     ; lba(23~27)写入device低4位, 高4位1111, 设置主盘、lab寻址
     mov dx, 0x1f6   ; device寄存器的低4位
     out dx, al
 
     mov dx, 0x1f7   ; 初始化状态寄存器~
     mov al, 0x20    ; 0010 0000~ DRDY: 设备就绪等待指令
-    out dx, al      ; 写操作, command寄存器, 硬盘开始工作
+    out dx, al      ; 写操作时状态寄存器"变成"command寄存器, 硬盘开始工作
 ; step4->read data
 ; 检测硬盘状态: BSY位
   .not_ready:
@@ -102,6 +102,8 @@ rd_disk_m_16:
     and al, 0x88    ; 10001000 检测BSY和DRQ
     cmp al, 0x08    ; 00001000 检测BSY位
     jnz .not_ready  ; 判断结果是否为0, 得出此时的硬盘工作状态
+                    ; jnz判断eflags寄存器的ZF位,如果结果为不为0,执行.not_ready
+                    ; 如果结果为0, 说明BSY位为0, 硬盘当前空闲, 执行下面的读操作
 
 ; 从0x1f0端口(primary通道的data寄存器)读数据
     mov ax, di      ; di<-cx<-待读入的扇区数
@@ -110,7 +112,7 @@ rd_disk_m_16:
                     ; -> [待读入的扇区数*每个扇区in操作的次数] = 4*256 = 1024
                     ; -> 16位乘法32位乘积的低16位在ax寄存器, 高16位在dx寄存器
     mov cx, ax      ; cx作为loop循环计数
-                    ; -> ax: 1024, 1024次循环,每次2个字节,正好2048->4个扇区,能够完全读取mbr
+                    ; -> ax: 1024, 1024次循环,每次2个字节,正好2048->4个扇区,能够完全读取loader
 
     mov dx, 0x1f0   ; 访问0x1f0寄存器读取数据
 
