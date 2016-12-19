@@ -24,6 +24,7 @@ kernel.bin: kernel_main                \
             kernel_device_timer        \
             kernel_memory              \
             kernel_thread              \
+            kernel_thread_switch       \
             lib_string
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
@@ -41,7 +42,8 @@ kernel.bin: kernel_main                \
             ${OUT}/bitmap.o            \
             ${OUT}/memory.o            \
             ${OUT}/thread.o            \
-            ${OUT}/dlist.o
+            ${OUT}/dlist.o             \
+            ${OUT}/switch.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
@@ -49,6 +51,8 @@ kernel_lib_print: kernel/lib/print.S
 	nasm -f elf32 -o ${OUT}/print.o kernel/lib/print.S
 kernel_kernel: kernel/kernel.S
 	nasm -f elf32 -o ${OUT}/kernel.o kernel/kernel.S
+kernel_thread_switch: kernel/thread/switch.S
+	nasm -f elf32 -o ${OUT}/switch.o kernel/thread/switch.S
 kernel_lib_print_string: kernel/lib/print_string.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/print_string.o kernel/lib/print_string.c
 kernel_lib_print_int: kernel/lib/print_int.c
