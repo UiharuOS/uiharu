@@ -47,5 +47,9 @@ static void* palloc(struct pool*);
 static void page_table_add(void*, void*);
 void* malloc_page(enum pool_flags, uint32_t);
 void* get_kernel_pages(uint32_t);
+void* _misaka(); // 申请内核空间内存
+void* _kuroko(); // 释放内核空间内存
+void* misaka();  // 申请用户空间内存
+void* kuroko();  // 释放用户空间内存
 
 #endif

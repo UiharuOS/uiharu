@@ -127,13 +127,17 @@ uint32_t* pte_ptr(uint32_t vaddr) {
     uint32_t* pte = (uint32_t*)(0xffc00000 + \
                     ((vaddr & 0xffc00000) >> 10) + \
                     PTE_IDX(vaddr) * 4);
-    return pte;
+    return pte; // pte是指向虚拟地址
+                // -- (高10位全是1, 中间10位vaddr高10位, 低12位是vaddr中间10位左移2位)
+                // 的指针
 }
 
 uint32_t* pde_ptr(uint32_t vaddr) {
     /* pde_ptr: 得到虚拟地址vaddr对应的pde指针 */
     uint32_t* pde = (uint32_t*)((0xfffff000)+PDE_IDX(vaddr)*4);
-    return pde;
+    return pde; // pde是指向虚拟地址
+                // -- (高20位全是1, 后12位是vaddr高10位左移2位)
+                // 的指针
 }
 
 static void* palloc(struct pool* m_pool) {
@@ -164,7 +168,7 @@ static void page_table_add(void* vaddr, void* page_phyaddr) {
             *pte = (_page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
         } else { // 该物理页已经被分配了
             DEBUGGER("the page pte point to, has been assigned!");
-            *pte = (_page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);  // 覆盖
+            // *pte = (_page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);  // 覆盖
         }
     } else { // 页表不存在, 虚拟地址索引范围超过了loader创建的页表范围, 创建新的页表
         // 页表属于系统资源, 页表页框空间从内核内存池中拿
