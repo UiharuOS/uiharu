@@ -4,7 +4,7 @@
 #include "boolean.h"
 
 #define offset(struct_type, member) (int)(&((struct_type*)0)->member)
-#define elem2entry(struct_type, struct_member_name, elem_ptr) \
+#define elem2pcb(struct_type, struct_member_name, elem_ptr) \
         (struct_type*)((int)elem_ptr-offset(struct_type, struct_member_name))
 
 struct list_entry {
