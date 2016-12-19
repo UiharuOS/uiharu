@@ -161,7 +161,6 @@ static void page_table_add(void* vaddr, void* page_phyaddr) {
     uint32_t* pte = pte_ptr(_vaddr);
 
     if (*pde & 0x00000001) { // 该虚拟地址查找到的页目录项存在(页表存在)
-        ASSERT(!(*pte & 0x00000001));
         if (!(*pte & 0x00000001)) {
             // 该虚拟地址查找到的页表项不存在(物理页不存在, 还没有被分配)
             // pte中存放的是物理页的起始物理地址, 与物理地址参数建立映射
