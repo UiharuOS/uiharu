@@ -16,4 +16,6 @@ enum intr_status intr_disable(void);
 enum intr_status intr_set_status(enum intr_status status);
 enum intr_status intr_get_status(void);
 
+intr_handler idt_table[IDT_DESC_CNT];  // 中断处理程序数组, 每个中断向量索引一个中断处理程序
+
 #endif

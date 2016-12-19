@@ -10,30 +10,37 @@
 #include "string.h"
 #include "stdint.h"
 #include "thread.h"
+#include "interrupt.h"
 
 void k_thread_a(void*);
+void k_thread_b(void*);
 
 int main(void) {
     print_string("This is uiharu kernel\n");
     init_all();
-    // asm volatile ("sti");  // 打开中断
-    // ASSERT(1==2);
-    // uint32_t* addr = (uint32_t*)get_kernel_pages(3);
-    // uint32_t* _addr = (uint32_t*)get_kernel_pages(1);
-    // page_table_add((void*)addr, (void*)0x1500);
-    // print_string("\nTest)-> get_kernel_page start vaddr is ");
-    // print_int(addr, 'H');
-    // print_int(_addr, 'H');
-    // print_string("\n");
-    thread_start("k_thread_a", 31, k_thread_a, "neo1218 ");
-    while(1); // 操作系统就是一个中断(事件)驱动的死循环(loop)
+    thread_start("k_thread_a", 31, k_thread_a, "misaka ");
+    thread_start("k_thread_b", 8, k_thread_b, "kuroko ");
+    // 开启时钟中断
+    intr_enable();
+    while (1) {
+        // 操作系统就是一个中断(事件)驱动的死循环(loop)
+        print_string("Main ");
+    }
     return 0;        
 }
 
 void k_thread_a(void* arg) {
     /* thread run in kernel */
     char* para = arg;  // cast
-    while(1) {
+    while (1) {
+        print_string(para);
+    }
+}
+
+void k_thread_b(void* arg) {
+    /* thread run in kernel */
+    char* para = arg;  // cast
+    while (1) {
         print_string(para);
     }
 }

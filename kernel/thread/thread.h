@@ -61,8 +61,8 @@ struct task_struct {
     uint8_t ticks;
     char name[16];
     uint32_t all_ticks;
-    struct list_entry thread_list_elem;
-    struct list_entry all_thread_list_elem;
+    struct list_entry thread_elem;
+    struct list_entry thread_all_list_elem;
     uint32_t* pgdir;
     uint32_t stack_magic;
 };

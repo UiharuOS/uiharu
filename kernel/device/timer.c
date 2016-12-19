@@ -2,6 +2,8 @@
 #include "io.h"
 #include "print.h"
 #include "stdint.h"
+#include "thread.h"
+#include "interrupt.h"
 
 #define IRQ0_FREQUENCY     100      // 100HZ/S的CPU时钟中断频率
 #define INPUT_FREQUENCY    1193180  // intel 8253定时计数器CLK时钟
@@ -32,6 +34,23 @@ static void frequency_set(uint8_t counter_port,
     outb(counter_port, (uint8_t)(counter_value >> 8));
 }
 
+static void intr_timer_handler(void) {
+    struct task_struct* current_thread = get_running_thread_pcb();
+    // 通过魔数, 检查内核线程栈是否越界破坏pcb信息
+    ASSERT(current_thread->stack_magic == 0x19960411);
+    current_thread->all_ticks++;
+    ticks++;
+    if (current_thread->ticks == 0) {
+        schedule();
+    } else {
+        current_thread->ticks--;
+    }
+}
+
+void register_handler(uint8_t vector_no, intr_handler function) {
+    idt_table[vector_no] = function;
+}
+
 void timer_init() {
     /* timer_init
      *  初始化8253寄存器
@@ -43,5 +62,7 @@ void timer_init() {
                   COUNTER0_MODE,
                   COUNTER0_VALUE
                   /*BCD默认为0, 使用2进制计数, 0代表65536*/);
+    print_string("Info)--> register intr_timer_handler done\n");
+    register_handler(0x20, intr_timer_handler);
     print_string("Info)-> intel 8253 timer init done\n");
 }

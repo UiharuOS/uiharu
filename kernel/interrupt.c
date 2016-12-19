@@ -26,7 +26,6 @@ struct gate_desc {
 };
 
 char* intr_name[IDT_DESC_CNT];         // 保存异常[名字](你的名字把uiharu写完看)
-intr_handler idt_table[IDT_DESC_CNT];  // 中断处理程序数组, 每个中断向量索引一个中断处理程序
 void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function);
 // static 函数
 static struct gate_desc idt[IDT_DESC_CNT];
@@ -67,11 +66,32 @@ static void general_intr_handler(uint8_t vec_nr) {
         // 伪中断(spurious interrupt) 
         return;
     }
-    print_string("int vector : 0x");
-    print_int(vec_nr, 'H');  // hex idt vector id
-    print_string("-->");
+    // 在屏幕左上角打印中断异常
+    set_cursor(0);
+    int cursor_pos = 0;
+    while (cursor_pos < 320) {
+        // 清空开始4行内容
+        print_char(' ');
+        cursor_pos++;
+    }
+    set_cursor(0);
+    print_string("!!!!!!!  interrupt exception occur !!!!!!!!\n");
+    set_cursor(88);
     print_string(intr_name[vec_nr]);
-    print_string("\n");
+    if (vec_nr == 14) {
+        int page_fault_vaddr = 0;
+        asm ("movl %%cr2, %0"
+             : "=r" (page_fault_vaddr);
+             : /* no input */
+             : /* no clobbor */
+            );
+        print_string("\n page_fault_vaddr -> ");
+        print_int(page_fault_vaddr, 'H');
+    }
+    print_string("\n!!!!!!!  interrupt exception occur !!!!!!!!\n");
+    // 进入中断处理程序, 处理器会自动将eflags寄存器的IF位置为0, 关中断,
+    // 中断是原子操作, 中断不能再被中断了
+    while(1);  // 异常,挂起
 }
 
 static void exception_init(void) {
