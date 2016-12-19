@@ -63,4 +63,13 @@ struct task_struct {
     uint32_t stack_magic;
 };
 
+// thread functions
+static void kernel_thread(thread_func* function, void* func_args);
+void thread_create(struct task_struct* pthread, thread_func function, void* func_args);
+void init_thread(struct task_struct* pthread, char* name, int priority);
+struct task_struct* thread_start(char* name,           \
+                                 int priority,         \
+                                 thread_func function, \
+                                 void* func_args);
+
 #endif

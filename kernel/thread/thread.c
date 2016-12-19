@@ -15,15 +15,16 @@ void thread_create(struct task_struct* pthread, thread_func function, void* func
     /* thread_create: 初始化线程栈:thread_stack */
     // 在线程内核栈中预留中断使用的栈空间
     pthread->self_kstack -= sizeof(struct intr_stack);
-    // 在线程内核栈中预留线程使用的栈空间
+    // 在线程内核栈中预留unused_retaddr使用的栈空间
     pthread->self_kstack -= sizeof(struct thread_stack);
     // 初始化线程栈
     struct thread_stack* kthread_stack = (struct thread_stack*)pthread->self_kstack;
+
     kthread_stack->eip = kernel_thread;  // 第一次执行时eip会指向kernel_thread
     kthread_stack->function = kernel_thread;
     kthread_stack->func_args = func_args;
     kthread_stack->ebp = kthread_stack->ebx = \
-    kthread_stack->esi = kernel_thread->edi = 0; // 全部初始化为0, 会被被调函数保存到线程栈中
+    kthread_stack->esi = kthread_stack->edi = 0; // 全部初始化为0, 会被被调函数保存到线程栈中
 }
 
 void init_thread(struct task_struct* pthread, char* name, int priority) {
@@ -52,14 +53,16 @@ struct task_struct* thread_start(char* name,           \
     init_thread(thread, name, priority);
     thread_create(thread, function, func_args);
 
+    // ABI
     asm volatile ("movl %0, %%esp;\
                    pop %%ebp; \
                    pop %%ebx; \
                    pop %%edi; \
                    pop %%esi; \
                    ret"
-                  :
-                  : "g" (thread->self_kstack)
-                  : "memory");
+                 :
+                 : "g" (thread->self_kstack)
+                 : "memory"
+                 );
     return thread;
 }

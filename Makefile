@@ -6,7 +6,7 @@ KERNEL_ADDR = 0xc0001500
 Ttext = -Ttext $(KERNEL_ADDR)
 LIBCFLAGS = -I $(LIBINCLUDE) -m32
 CFLAGS = $(INCLUDE) -m32 -fno-builtin
-INCLUDE = -Ilib/ -Ikernel/ -Ikernel/lib/ -Ikernel/device/ -Iacademy-city/
+INCLUDE = -Ilib/ -Ikernel/ -Ikernel/lib/ -Ikernel/device/ -Ikernel/thread/ -Iacademy-city/
 
 all: kernel.bin
 
@@ -22,6 +22,7 @@ kernel.bin: kernel_main                \
             kernel_debug               \
             kernel_device_timer        \
             kernel_memory              \
+            kernel_thread              \
             lib_string
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
@@ -37,7 +38,8 @@ kernel.bin: kernel_main                \
             ${OUT}/timer.o             \
             ${OUT}/string.o            \
             ${OUT}/bitmap.o            \
-            ${OUT}/memory.o
+            ${OUT}/memory.o            \
+            ${OUT}/thread.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
@@ -61,6 +63,8 @@ kernel_debug: kernel/debug.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/debug.o kernel/debug.c
 kernel_memory: kernel/memory.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/memory.o kernel/memory.c
+kernel_thread: kernel/thread/thread.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/thread.o kernel/thread/thread.c
 kernel_device_timer: kernel/device/timer.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/timer.o kernel/device/timer.c
 
