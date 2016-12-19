@@ -51,7 +51,6 @@ struct thread_stack {
     void (*unused_retaddr);  // 用于在返回地址所在的栈帧中占位
     thread_func* function;   // 线程中执行的函数
     void* func_args;         // 线程中执行函数的参数
-    // 最终线程函数的调用形式是: void function(func_args);
 };
 
 /* Process Control Block */

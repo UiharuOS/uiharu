@@ -69,6 +69,8 @@ static void general_intr_handler(uint8_t vec_nr) {
     }
     print_string("int vector : 0x");
     print_int(vec_nr, 'H');  // hex idt vector id
+    print_string("-->");
+    print_string(intr_name[vec_nr]);
     print_string("\n");
 }
 

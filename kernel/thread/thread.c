@@ -21,7 +21,7 @@ void thread_create(struct task_struct* pthread, thread_func function, void* func
     struct thread_stack* kthread_stack = (struct thread_stack*)pthread->self_kstack;
 
     kthread_stack->eip = kernel_thread;  // 第一次执行时eip会指向kernel_thread
-    kthread_stack->function = kernel_thread;
+    kthread_stack->function = function;
     kthread_stack->func_args = func_args;
     kthread_stack->ebp = kthread_stack->ebx = \
     kthread_stack->esi = kthread_stack->edi = 0; // 全部初始化为0, 会被被调函数保存到线程栈中
@@ -29,7 +29,7 @@ void thread_create(struct task_struct* pthread, thread_func function, void* func
 
 void init_thread(struct task_struct* pthread, char* name, int priority) {
     /* int_thread: 初始化进程(线程)的基本信息 */
-    // memset(pthread, 0, sizeof(*pthread)); // 物理页清0, 避免分配到脏页; get_kernel_pages已经清0过了
+    // memset(pthread, 0, sizeof(*pthread)); // 物理页清0, 避免分配到脏页, get_kernel_page
     strcpy(pthread->name, name);
     pthread->status = TASK_RUNNING;
     pthread->priority = priority;
