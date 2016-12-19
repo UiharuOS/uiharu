@@ -19,7 +19,7 @@ int main(void) {
     print_string("This is uiharu kernel\n");
     init_all();
     thread_start("k_thread_a", 31, k_thread_a, "misaka ");
-    thread_start("k_thread_b", 8, k_thread_b, "kuroko ");
+    // thread_start("k_thread_b", 8, k_thread_b, "kuroko ");
     // 开启时钟中断
     intr_enable();
     while (1) {

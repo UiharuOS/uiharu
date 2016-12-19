@@ -8,6 +8,31 @@ SELECTOR_VIDEO equ (0x0003<<3) + TI_GDT + RPL0
 
 section .text
 ;------------------------------------------------
+; set_cursor: set cursor
+;------------------------------------------------
+global set_cursor
+set_cursor:
+; 更新光标寄存器为bx值
+    pushad
+    mov bx, [esp+36]
+
+    mov dx, 0x03d4          ; Address Register
+    mov al, 0x0e            ; Cursor Register High Location
+    out dx, al
+    mov dx, 0x03d5          ; Data Register
+    mov al, bh              ; high of bx
+    out dx, al              ; 设置光标寄存器的高8位
+
+    mov dx, 0x03d4
+    mov al, 0x0f
+    out dx, al
+    mov dx, 0x03d5
+    mov al, bl
+    out dx, al
+
+    popad
+    retet
+;------------------------------------------------
 ; print_str: 打印字符串, 基于print_char
 ;------------------------------------------------
 global print_str
@@ -141,7 +166,6 @@ print_char:
     mov bx, 1920            ; 将光标重置为1920: 最后一行首字符
 
 .set_cursor:
-; 更新光标寄存器为bx值
     mov dx, 0x03d4          ; Address Register
     mov al, 0x0e            ; Cursor Register High Location
     out dx, al
@@ -155,6 +179,7 @@ print_char:
     mov dx, 0x03d5
     mov al, bl
     out dx, al
+
 .print_char_done:
     popad                   ; 恢复32位寄存器环境
     ret

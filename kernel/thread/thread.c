@@ -13,7 +13,7 @@
 struct task_struct* main_thread;    // 主线程pcb
 struct list thread_ready_list;      // 就绪任务队列
 struct list thread_all_list;        // 所有任务队列
-static struct list_entry* thread_elem;
+static struct list_entry* general_thread_elem;
 /* switch from current to next */
 extern void switch_to(struct task_struct* current, struct task_struct* next);
 
@@ -139,13 +139,13 @@ void schedule() {
     }
     // 如果就绪队列不为空
     ASSERT(!list_empty(&thread_ready_list));
-    // 清空thread_elem
-    thread_elem = 0;
+    // 清空general_thread_elem
+    general_thread_elem = 0;
     // 调度就绪队列队首任务上CPU
-    thread_elem = list_pop(&thread_ready_list); // 保存下一个运行的任务
+    general_thread_elem = list_pop(&thread_ready_list); // 保存下一个运行的任务
     // 将该任务节点转换成对应的PCB
     // (task_struct*)((int)thread_elem-(int)(&((task_struct*)0)->next->status))
-    struct task_struct* next = elem2pcb(struct task_struct, thread_elem, thread_elem);
+    struct task_struct* next = elem2pcb(struct task_struct, thread_elem, general_thread_elem);
     next->status = TASK_RUNNING;
     // 调度切换
     switch_to(current, next);

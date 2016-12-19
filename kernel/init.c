@@ -15,7 +15,7 @@ void init_all(void) {
      */
     print_string("Info)-> init all\n");
     idt_init();     // 初始化中断向量表(描述符表)
-    timer_init();   // 初始化8253PIC, 提高时钟中断频率(100HZ/S)
     mem_init();     // 初始化内存管理
     thread_init();  // 初始化线程调度
+    timer_init();   // 初始化8253PIC, 提高时钟中断频率(100HZ/S)
 }
