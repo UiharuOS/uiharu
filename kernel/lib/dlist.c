@@ -19,7 +19,7 @@ void list_insert_before(struct list_entry* before, struct list_entry* elem) {
 }
 
 void list_push(struct list* plist, struct list_entry* elem) {
-    list_insert_before(plist->head->next, elem);
+    list_insert_before(plist->head.next, elem);
 };
 
 void list_append(struct list* plist, struct list_entry* elem) {
@@ -34,13 +34,13 @@ void list_remove(struct list* plist, struct list_entry* elem) {
 }
 
 struct list_entry* list_pop(struct list* plist) {
-    struct list_entry* _elem = plist->head->next;
-    list_remove(_elem);
+    struct list_entry* _elem = plist->head.next;
+    list_remove(plist, _elem);
     return _elem ;
 };
 
-bool elem_find(struct list* plist, struct list_entry* elem) {
-    struct list_entry* _elem = plist->head->next;
+boolean elem_find(struct list* plist, struct list_entry* elem) {
+    struct list_entry* _elem = plist->head.next;
     while (_elem != &plist->tail) {
         if (_elem == elem) {
             return true;
@@ -51,7 +51,7 @@ bool elem_find(struct list* plist, struct list_entry* elem) {
 }
 
 struct list_entry* list_traversal(struct list* plist, function func, int arg) {
-    struct list_entry* elem = plist->head->next;
+    struct list_entry* elem = plist->head.next;
     if (list_empty(plist)) {
         return 0;
     }
@@ -65,15 +65,15 @@ struct list_entry* list_traversal(struct list* plist, function func, int arg) {
 };
 
 uint32_t list_len(struct list* plist) {
-    uint32_t count = 0
-    struct list_entry* _elem = plist->head->next;
-    while (_elem != plist->tail) {
+    uint32_t count = 0;
+    struct list_entry* _elem = plist->head.next;
+    while (_elem != &plist->tail) {
         count++;
-        elem = elem->next
+        _elem = _elem->next;
     }
-    return count;
+    return count+1;
 }
 
-bool list_empty(struct list* plist) {
-    return (plist->head->next == &plist->tail ? true : false);
+boolean list_empty(struct list* plist) {
+    return (plist->head.next == &plist->tail ? true : false);
 }

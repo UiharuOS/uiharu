@@ -15,6 +15,7 @@ kernel.bin: kernel_main                \
             kernel_lib_print_string    \
             kernel_lib_print_int       \
             kernel_lib_bitmap          \
+            kernel_lib_dlist           \
             kernel_init                \
             kernel_interrupt           \
             kernel_interrupt_switch    \
@@ -39,7 +40,8 @@ kernel.bin: kernel_main                \
             ${OUT}/string.o            \
             ${OUT}/bitmap.o            \
             ${OUT}/memory.o            \
-            ${OUT}/thread.o
+            ${OUT}/thread.o            \
+            ${OUT}/dlist.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
@@ -53,6 +55,8 @@ kernel_lib_print_int: kernel/lib/print_int.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/print_int.o kernel/lib/print_int.c
 kernel_lib_bitmap: kernel/lib/bitmap.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/bitmap.o kernel/lib/bitmap.c
+kernel_lib_dlist: kernel/lib/dlist.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/dlist.o kernel/lib/dlist.c
 kernel_init: kernel/init.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/init.o kernel/init.c
 kernel_interrupt: kernel/interrupt.c
