@@ -75,5 +75,9 @@ struct task_struct* thread_start(char* name,           \
                                  int priority,         \
                                  thread_func function, \
                                  void* func_args);
+struct task_struct* get_running_thread_pcb();
+static void make_main_thread(void);
+void schedule();
+void thread_init(void);
 
 #endif
