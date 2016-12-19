@@ -16,7 +16,7 @@ enum intr_status intr_enable() {
         old_status = INTR_ON;
         return old_status;
     } else {
-        old_status = INTR_ON;
+        old_status = INTR_OFF;
         asm volatile ("sti");   // 开中断, sti指令会将eflags的if位置为1
         return old_status;
     }

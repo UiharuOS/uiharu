@@ -11,7 +11,7 @@ void debugger(char* filename, int line, const char* func, const char* condition)
     #define ASSERT(CONDITION)       \
         if (CONDITION) {            \
         } else {                    \
-            DEBUGGER(#CONDITION);    \
+            DEBUGGER(#CONDITION);   \
         }
 
 #endif
