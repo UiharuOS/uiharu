@@ -2,6 +2,7 @@
 #define _KERNEL_INTERRUPT_H
 
 #include "stdint.h"
+#define IDT_DESC_CNT 0x21  // 目前总共支持0x21(33)个中断向量
 
 void idt_init(void);
 typedef void* intr_handler;

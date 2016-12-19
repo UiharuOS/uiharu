@@ -4,6 +4,7 @@
 #include "stdint.h"
 #include "thread.h"
 #include "interrupt.h"
+#include "debug.h"
 
 #define IRQ0_FREQUENCY     100      // 100HZ/S的CPU时钟中断频率
 #define INPUT_FREQUENCY    1193180  // intel 8253定时计数器CLK时钟

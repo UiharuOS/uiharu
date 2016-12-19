@@ -145,7 +145,7 @@ void schedule() {
     thread_elem = list_pop(&thread_ready_list); // 保存下一个运行的任务
     // 将该任务节点转换成对应的PCB
     // (task_struct*)((int)thread_elem-(int)(&((task_struct*)0)->next->status))
-    struct task_struct* next = elem2pcb(struct task_struct, next->status, thread_elem);
+    struct task_struct* next = elem2pcb(struct task_struct, thread_elem, thread_elem);
     next->status = TASK_RUNNING;
     // 调度切换
     switch_to(current, next);

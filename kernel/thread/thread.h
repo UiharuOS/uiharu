@@ -2,6 +2,7 @@
 #define KERNEL_THREAD_H
 
 #include "stdint.h"
+#include "dlist.h"
 
 /* 自定义通用函数类型thread_func,作为线程函数的形参类型 */
 typedef void thread_func(void*);

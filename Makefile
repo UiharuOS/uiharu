@@ -22,6 +22,7 @@ kernel.bin: kernel_main                \
             kernel_kernel              \
             kernel_debug               \
             kernel_device_timer        \
+            kernel_device_set_cursor   \
             kernel_memory              \
             kernel_thread              \
             kernel_thread_switch       \
@@ -43,7 +44,8 @@ kernel.bin: kernel_main                \
             ${OUT}/memory.o            \
             ${OUT}/thread.o            \
             ${OUT}/dlist.o             \
-            ${OUT}/switch.o
+            ${OUT}/switch.o            \
+            ${OUT}/set_cursor.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
@@ -53,6 +55,8 @@ kernel_kernel: kernel/kernel.S
 	nasm -f elf32 -o ${OUT}/kernel.o kernel/kernel.S
 kernel_thread_switch: kernel/thread/switch.S
 	nasm -f elf32 -o ${OUT}/switch.o kernel/thread/switch.S
+kernel_device_set_cursor: kernel/device/set_cursor.S
+	nasm -f elf32 -o ${OUT}/set_cursor.o kernel/device/set_cursor.S
 kernel_lib_print_string: kernel/lib/print_string.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/print_string.o kernel/lib/print_string.c
 kernel_lib_print_int: kernel/lib/print_int.c

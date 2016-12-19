@@ -10,7 +10,6 @@
 #include "io.h"
 #include "print.h"
 
-#define IDT_DESC_CNT 0x21  // 目前总共支持0x21(33)个中断向量
 #define PIC_M_CTRL 0x20    // PIC主片控制端口号
 #define PIC_M_DATA 0x21    // PIC主片数据端口号
 #define PIC_S_CTRL 0xa0    // PIC从片控制端口号
@@ -81,7 +80,7 @@ static void general_intr_handler(uint8_t vec_nr) {
     if (vec_nr == 14) {
         int page_fault_vaddr = 0;
         asm ("movl %%cr2, %0"
-             : "=r" (page_fault_vaddr);
+             : "=r" (page_fault_vaddr)
              : /* no input */
              : /* no clobbor */
             );
