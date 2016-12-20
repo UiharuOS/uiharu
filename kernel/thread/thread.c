@@ -100,12 +100,9 @@ struct task_struct* thread_start(char* name,           \
     // ASSERT(!elem_find(&thread_ready_list, &thread->thread_elem));
     // 将该线程加入就绪队列中
     list_append(&thread_ready_list, &thread->thread_elem);
-
-    // info
-    print_string("thread start->");
-    print_string(name);
-    print_string("\n\n\n\n");
-
+    // print_string("\n\n\n\n");
+    // print_int(list_len(&thread_ready_list), 'D');
+    // print_string("\n\n\n\n");
     // ABI
     asm volatile ("movl %0, %%esp;\
                    pop %%ebp; \
@@ -113,7 +110,7 @@ struct task_struct* thread_start(char* name,           \
                    pop %%edi; \
                    pop %%esi; \
                    ret"
-                 :
+                 : /* no outputs */
                  : "g" (thread->self_kstack)
                  : "memory"
                  );
@@ -160,12 +157,13 @@ void schedule() {
     next->status = TASK_RUNNING;
     // 调度切换
     switch_to(current, next);
-    /*
-    print_string("\n");
-    print_int(next->priority, 'D');
-    print_string("\n");
-    print_int(list_len(&thread_ready_list), 'D');
-    */
+    // print_string("\n");
+    // print_int(next->priority, 'D');
+    // print_string("\n");
+    // ASSERT(!list_empty(&thread_ready_list));
+    // print_int(list_len(&thread_ready_list), 'B');  // kuroko not in ready list
+    // int i = 1000;
+    // while(i--);
 }
 
 void thread_init(void) {

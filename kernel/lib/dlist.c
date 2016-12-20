@@ -71,7 +71,7 @@ uint32_t list_len(struct list* plist) {
         count++;
         _elem = _elem->next;
     }
-    return count+1;
+    return count;
 }
 
 boolean list_empty(struct list* plist) {
