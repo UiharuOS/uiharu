@@ -41,6 +41,7 @@ static void intr_timer_handler(void) {
     ASSERT(current_thread->stack_magic == 0x19960411);
     current_thread->all_ticks++;
     ticks++;
+    // print_int(ticks, 'D');
     if (current_thread->ticks == 0) {
         schedule();
     } else {

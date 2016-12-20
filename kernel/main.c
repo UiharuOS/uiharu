@@ -9,7 +9,6 @@
 #include "debug.h"
 #include "string.h"
 #include "stdint.h"
-#include "thread.h"
 #include "interrupt.h"
 
 void k_thread_a(void*);
@@ -18,12 +17,13 @@ void k_thread_b(void*);
 int main(void) {
     print_string("This is uiharu kernel\n");
     init_all();
-    thread_start("k_thread_a", 31, k_thread_a, "misaka ");
-    // thread_start("k_thread_b", 8, k_thread_b, "kuroko ");
-    // 开启时钟中断
+    // 开中断
     intr_enable();
+    // create threads
+    thread_start("k_thread_a", 5, k_thread_a, "misaka ");
+    thread_start("k_thread_b", 4, k_thread_b, "koroku ");
+    // main thread
     while (1) {
-        // 操作系统就是一个中断(事件)驱动的死循环(loop)
         print_string("Main ");
     }
     return 0;        

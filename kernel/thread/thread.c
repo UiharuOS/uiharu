@@ -70,6 +70,10 @@ void init_thread(struct task_struct* pthread, char* name, int priority) {
     pthread->self_kstack = (uint32_t*)((uint32_t)pthread + PG_SIZE);
     pthread->ticks = priority; // 调度策略: 优先级越大, CPU分与的时间片越长
     pthread->all_ticks = 0;
+    pthread->thread_elem.next = 0;
+    pthread->thread_elem.prev = 0;
+    pthread->thread_all_list_elem.next = 0;
+    pthread->thread_all_list_elem.prev = 0;
     pthread->pgdir = 0;
     pthread->stack_magic = 0x19960411;  // 这是一个神奇的数字, 用作魔数
 }
@@ -87,14 +91,14 @@ struct task_struct* thread_start(char* name,           \
     thread_create(thread, function, func_args);
 
     // 线程调度队列
-    // 被调度线程之前不在就绪队列中
-    ASSERT(!elem_find(&thread_ready_list, &thread->thread_elem));
-    // 将该线程加入就绪队列中
-    list_append(&thread_ready_list, &thread->thread_elem);
     // 被调度线程之前不在线程队列中
-    ASSERT(!elem_find(&thread_all_list, &thread->thread_all_list_elem));
+    // ASSERT(!elem_find(&thread_all_list, &thread->thread_all_list_elem));
     // 将该线程加入线程队列中
     list_append(&thread_all_list, &thread->thread_all_list_elem);
+    // 被调度线程之前不在就绪队列中
+    // ASSERT(!elem_find(&thread_ready_list, &thread->thread_elem));
+    // 将该线程加入就绪队列中
+    list_append(&thread_ready_list, &thread->thread_elem);
 
     // ABI
     asm volatile ("movl %0, %%esp;\
@@ -149,6 +153,12 @@ void schedule() {
     next->status = TASK_RUNNING;
     // 调度切换
     switch_to(current, next);
+    /*
+    print_string("\n");
+    print_int(next->priority, 'D');
+    print_string("\n");
+    print_int(list_len(&thread_ready_list), 'D');
+    */
 }
 
 void thread_init(void) {
