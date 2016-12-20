@@ -92,6 +92,7 @@ struct task_struct* thread_start(char* name,           \
 
     // 线程调度队列
     // 被调度线程之前不在线程队列中
+    // fuck shit ASSERT!!!
     // ASSERT(!elem_find(&thread_all_list, &thread->thread_all_list_elem));
     // 将该线程加入线程队列中
     list_append(&thread_all_list, &thread->thread_all_list_elem);
@@ -99,6 +100,11 @@ struct task_struct* thread_start(char* name,           \
     // ASSERT(!elem_find(&thread_ready_list, &thread->thread_elem));
     // 将该线程加入就绪队列中
     list_append(&thread_ready_list, &thread->thread_elem);
+
+    // info
+    print_string("thread start->");
+    print_string(name);
+    print_string("\n\n\n\n");
 
     // ABI
     asm volatile ("movl %0, %%esp;\
@@ -111,6 +117,7 @@ struct task_struct* thread_start(char* name,           \
                  : "g" (thread->self_kstack)
                  : "memory"
                  );
+    
     return thread;
 }
 
