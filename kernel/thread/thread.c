@@ -96,19 +96,41 @@ struct task_struct* uthread_create(char* name,           \
     ASSERT(!elem_find(&thread_ready_list, &thread->thread_elem));
     // 将该线程加入就绪队列中
     list_append(&thread_ready_list, &thread->thread_elem);
-    // ABI
-    // asm volatile ("movl %0, %%esp;\
-    //                pop %%ebp; \
-    //                pop %%ebx; \
-    //                pop %%edi; \
-    //                pop %%esi; \
-    //                ret"
-    //              : /* no outputs */
-    //              : "g" (thread->self_kstack)
-    //              : "memory"
-    //              );
-    // 
+
     return thread;
+}
+
+void uthread_sleep(enum task_status status) {
+    ASSERT(((status == TASK_BLOCKED) || \
+            (status == TASK_WAITING) || \
+            (status == TASK_HANGING)));
+    enum intr_status old_status = intr_disable();
+    // 关中断
+    struct task_struct* current = get_running_thread_pcb();
+    current->status = status;
+    schedule();  // 将当前线程换下CPU
+    // 恢复中断
+    intr_set_status(old_status);
+}
+
+void uthread_awake(struct task_struct* thread) {
+    enum intr_status old_status = intr_disable();
+    // 关中断
+    ASSERT(((status == TASK_BLOCKED) || \
+            (status == TASK_WAITING) || \
+            (status == TASK_HANGING)));
+    if (thread->status != TASK_READY) {
+        ASSERT(status != TASK_DIED);
+        ASSERT(!elem_find(&thread_ready_list, &thread->thread_elem));
+        if (elem_find(&thread_ready_list, &thread->thread_elem)) {
+            DEBUGGER("blocked thread in ready list\n");
+        } else {
+            thread->status = TASK_READY;
+            list_push(&thread_ready_list, &thread->thread_elem);
+        }
+    }
+    // 恢复中断
+    intr_set_status(old_status)
 }
 
 static void make_main_thread(void) {
