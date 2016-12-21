@@ -16,6 +16,7 @@ enum intr_status intr_enable(void);
 enum intr_status intr_disable(void);
 enum intr_status intr_set_status(enum intr_status status);
 enum intr_status intr_get_status(void);
+void register_handler(uint8_t vector_no, intr_handler function);
 
 intr_handler idt_table[IDT_DESC_CNT];  // 中断处理程序数组, 每个中断向量索引一个中断处理程序
 

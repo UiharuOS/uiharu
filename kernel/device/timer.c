@@ -49,10 +49,6 @@ static void intr_timer_handler(void) {
     }
 }
 
-void register_handler(uint8_t vector_no, intr_handler function) {
-    idt_table[vector_no] = function;
-}
-
 void timer_init() {
     /* timer_init
      *  初始化8253寄存器

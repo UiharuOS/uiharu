@@ -99,6 +99,10 @@ static void general_intr_handler(uint8_t vec_nr) {
     while(1);  // 异常,挂起
 }
 
+void register_handler(uint8_t vector_no, intr_handler function) {
+    idt_table[vector_no] = function;
+}
+
 static void exception_init(void) {
     /* exception_init: 完成一般中断处理函数注册及异常名称注册
      */

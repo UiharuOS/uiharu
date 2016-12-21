@@ -30,17 +30,17 @@ int main(void) {
 void k_thread_a(void* arg) {     
     char* para = arg;  // cast
     while(1) {
-        // intr_disable();
+        intr_disable();
         print_string(para);
-        // intr_enable();
+        intr_enable();
     }
 }
 
 void k_thread_b(void* arg) {     
     char* para = arg;  // cast
     while(1) {
-        // intr_disable();
+        intr_disable();
         print_string(para);
-        // intr_enable();
+        intr_enable();
     }
 }
