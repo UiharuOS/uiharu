@@ -74,11 +74,11 @@ void init_thread(struct task_struct* thread, char* name, int priority) {
     thread->stack_magic = 0x19960411;  // 这是一个神奇的数字, 用作魔数
 }
 
-struct task_struct* thread_start(char* name,           \
+struct task_struct* create_thread(char* name,           \
                                  int priority,         \
                                  thread_func function, \
                                  void* func_args) {
-    /* thread_start: 创建一个指定优先级的线程 */
+    /* create_thread: 创建一个指定优先级的线程 */
     // 所有进程(kernel/user)的PCB都由操作系统调度维护, 位于内核空间
     // 在内核物理内存池中申请一页内存分配给该线程(所属进程)的PCB
     // thread存储的是该页内存的起始虚拟地址
