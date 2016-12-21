@@ -55,3 +55,31 @@ void uup(struct semaphore* usemaphore) {
     // 恢复中断
     intr_set_status(old_status);
 }
+
+void lacquire(struct lock* ulock) {
+    /* lacquire: 获取锁ulock */
+    struct task_struct* current = get_running_thread_pcb();
+    if (ulock->guard != current) {
+        udown(&ulock->lock_semaphore);  // 对锁信号量进行down操作
+        ulock->guard = current;
+        ASSERT(ulock->guard_repeat_num == 0);
+        ulock->guard_repeat_num = 1;
+    } else {
+        // 已经持有锁, 重复申请, 纪录+1
+        ulock->guard_repeat_num++;
+    }
+}
+
+void lrelease(struct lock* ulock) {
+    /* lrelease: 释放锁ulock */
+    struct task_struct* current = get_running_thread_pcb();
+    ASSERT(ulock->guard == task_struct);
+    if (ulock->guard_repeat_num > 1) {
+        ulock->guard_repeat_num--;
+        return;
+    } 
+    ASSERT(ulock->guard_repeat_num == 1);
+    ulock->guard_repeat_num = 0;
+    ulock->guard = NULL;
+    uup(&ulock->lock_semaphore);
+}
