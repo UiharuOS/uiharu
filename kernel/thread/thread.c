@@ -115,6 +115,7 @@ void uthread_sleep(enum task_status status) {
 
 void uthread_awake(struct task_struct* thread) {
     enum intr_status old_status = intr_disable();
+    enum task_status status = thread->status;
     // 关中断
     ASSERT(((status == TASK_BLOCKED) || \
             (status == TASK_WAITING) || \

@@ -76,6 +76,8 @@ struct task_struct* uthread_create(char* name,           \
                                    int priority,         \
                                    thread_func function, \
                                    void* func_args);
+void uthread_sleep(enum task_status);
+void uthread_awake(struct task_struct*);
 struct task_struct* get_running_thread_pcb();
 static void make_main_thread(void);
 void schedule();

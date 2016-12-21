@@ -18,4 +18,11 @@ struct lock {
     uint32_t guard_repeat_num;      // 锁的持有者重复申请锁的次数
 };
 
+void semaphore_init(struct semaphore* usemaphore, uint8_t value);
+void lock_init(struct lock* ulock);
+void udown(struct semaphore* usemaphore);  // 原子操作->信号量P操作
+void uup(struct semaphore* usemaphore);    // 原子操作->信号量V操作
+void lacquire(struct lock*);
+void lrelease(struct lock*);
+
 #endif
