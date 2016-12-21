@@ -2,7 +2,7 @@
 #define KERNEL_LIB_BITMAP_H
 
 #include "global.h"
-#include "boolean.h"
+#include "type.h"
 
 /* 用于位图中的&逐位判断*/
 #define BITMAP_MASK 1

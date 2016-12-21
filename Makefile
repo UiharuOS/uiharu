@@ -1,6 +1,8 @@
 # Makefile for UiharuOS
 
 CC = gcc
+AS = nasm
+ASFLAGS = -f elf32
 OUT = build
 KERNEL_ADDR = 0xc0001500
 Ttext = -Ttext $(KERNEL_ADDR)
@@ -46,38 +48,38 @@ kernel.bin: kernel_main                \
             ${OUT}/switch.o            \
 
 kernel_main: kernel/main.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/main.o kernel/main.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/main.o $<
 kernel_lib_print: kernel/lib/print.S
-	nasm -f elf32 -o ${OUT}/print.o kernel/lib/print.S
+	$(AS) $(ASFLAGS) -o ${OUT}/print.o $<
 kernel_kernel: kernel/kernel.S
-	nasm -f elf32 -o ${OUT}/kernel.o kernel/kernel.S
+	$(AS) $(ASFLAGS) -o ${OUT}/kernel.o $<
 kernel_thread_switch: kernel/thread/switch.S
-	nasm -f elf32 -o ${OUT}/switch.o kernel/thread/switch.S
+	$(AS) $(ASFLAGS) -o ${OUT}/switch.o $<
 kernel_lib_print_string: kernel/lib/print_string.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/print_string.o kernel/lib/print_string.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/print_string.o $<
 kernel_lib_print_int: kernel/lib/print_int.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/print_int.o kernel/lib/print_int.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/print_int.o $<
 kernel_lib_bitmap: kernel/lib/bitmap.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/bitmap.o kernel/lib/bitmap.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/bitmap.o $<
 kernel_lib_dlist: kernel/lib/dlist.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/dlist.o kernel/lib/dlist.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/dlist.o $<
 kernel_init: kernel/init.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/init.o kernel/init.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/init.o $<
 kernel_interrupt: kernel/interrupt.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt.o kernel/interrupt.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt.o $<
 kernel_interrupt_switch: kernel/interrupt_switch.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt_switch.o kernel/interrupt_switch.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/interrupt_switch.o $<
 kernel_debug: kernel/debug.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/debug.o kernel/debug.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/debug.o $<
 kernel_memory: kernel/memory.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/memory.o kernel/memory.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/memory.o $<
 kernel_thread: kernel/thread/thread.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/thread.o kernel/thread/thread.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/thread.o $<
 kernel_device_timer: kernel/device/timer.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/timer.o kernel/device/timer.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/timer.o $<
 
 lib_string: lib/string.c
-	$(CC) $(CFLAGS) -c -o ${OUT}/string.o lib/string.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/string.o $<
 
 build:
 	mkdir ${OUT}

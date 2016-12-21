@@ -58,9 +58,9 @@ struct thread_stack {
 struct task_struct {
     uint32_t* self_kstack;   // 内核线程自己的内核栈
     enum task_status status; // 进程状态
+    char name[16];
     uint8_t priority;        // 线程调度优先级
     uint8_t ticks;
-    char name[16];
     uint32_t all_ticks;
     struct list_entry thread_elem;
     struct list_entry thread_all_list_elem;

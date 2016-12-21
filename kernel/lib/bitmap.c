@@ -4,6 +4,7 @@
 #include "print.h"
 #include "interrupt.h"
 #include "debug.h"
+#include "type.h"
 
 void bitmap_init(struct bitmap* btmp) {
     /* bitmap_init: 初始化位图

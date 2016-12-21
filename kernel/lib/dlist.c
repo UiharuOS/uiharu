@@ -1,21 +1,24 @@
 #include "dlist.h"
 #include "interrupt.h"
 #include "stdint.h"
+#include "type.h"
 
 void list_init(struct list* list) {
-    list->head.prev = 0;
+    list->head.prev = NULL;
     list->head.next = &list->tail;
     list->tail.prev = &list->head;
-    list->tail.next = 0;
+    list->tail.next = NULL;
 }
 
 void list_insert_before(struct list_entry* before, struct list_entry* elem) {
-    enum intr_status old_status = intr_disable();  // close interrupt
+    enum intr_status old_status = intr_disable();
+    // close interrupt
     before->prev->next = elem;
     elem->prev = before->prev;
     elem->next = before;
     before->prev = elem;
-    intr_set_status(old_status);  // resume interrupt
+    // resume interrupt
+    intr_set_status(old_status);
 }
 
 void list_push(struct list* plist, struct list_entry* elem) {
@@ -27,10 +30,12 @@ void list_append(struct list* plist, struct list_entry* elem) {
 };
 
 void list_remove(struct list* plist, struct list_entry* elem) {
-    enum intr_status old_status = intr_disable();  // close interrupt
+    enum intr_status old_status = intr_disable();
+    // close interrupt
     elem->prev->next = elem->next;
     elem->next->prev = elem->prev;
-    intr_set_status(old_status);  // resume interrupt
+    // resume interrupt
+    intr_set_status(old_status);
 }
 
 struct list_entry* list_pop(struct list* plist) {
@@ -45,7 +50,7 @@ boolean elem_find(struct list* plist, struct list_entry* elem) {
         if (_elem == elem) {
             return true;
         }
-        elem = elem->next;
+        _elem = _elem->next;
     }
     return false;
 }
@@ -53,7 +58,7 @@ boolean elem_find(struct list* plist, struct list_entry* elem) {
 struct list_entry* list_traversal(struct list* plist, function func, int arg) {
     struct list_entry* elem = plist->head.next;
     if (list_empty(plist)) {
-        return 0;
+        return NULL;
     }
     while (elem != &plist->tail) {
         if (func(elem, arg)) {
@@ -61,7 +66,7 @@ struct list_entry* list_traversal(struct list* plist, function func, int arg) {
         }
         elem = elem->next;
     }
-    return 0;
+    return NULL;
 };
 
 uint32_t list_len(struct list* plist) {

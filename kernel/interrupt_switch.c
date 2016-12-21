@@ -7,6 +7,7 @@
 
 #define EFLAGS_IF 0x00000200  // eflags寄存器if位为1
 #define GET_EFLAGS(EFLAGS_VAR) asm volatile ("pushfl; popl %0" : "=g" (EFLAGS_VAR))
+// pushf: push the flags onto the stack
 
 enum intr_status intr_enable() {
     /* intr_enable 开中断并返回开中断前的状态
