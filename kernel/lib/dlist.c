@@ -14,7 +14,7 @@ void list_insert_before(struct list_entry* before, struct list_entry* elem) {
     before->prev->next = elem;
     elem->prev = before->prev;
     elem->next = before;
-    before->next = elem;
+    before->prev = elem;
     intr_set_status(old_status);  // resume interrupt
 }
 

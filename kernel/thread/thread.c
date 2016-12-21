@@ -97,7 +97,7 @@ struct task_struct* thread_start(char* name,           \
     // 将该线程加入线程队列中
     list_append(&thread_all_list, &thread->thread_all_list_elem);
     // 被调度线程之前不在就绪队列中
-    // ASSERT(!elem_find(&thread_ready_list, &thread->thread_elem));
+    ASSERT(!elem_find(&thread_ready_list, &thread->thread_elem));
     // 将该线程加入就绪队列中
     list_append(&thread_ready_list, &thread->thread_elem);
     // print_string("\n\n\n\n");
@@ -123,6 +123,11 @@ static void make_main_thread(void) {
     // 内核被加载时已经初始化了地址空间
     main_thread = get_running_thread_pcb();
     init_thread(main_thread, "main", 31);
+    print_string("Info)--> main_thread ");
+    print_string(main_thread->name);
+    print_string(" ");
+    print_int(main_thread->priority, 'D');
+    print_string("\n");
     // main已经运行, 不用添加到ready队列
     ASSERT(!elem_find(&thread_all_list, &main_thread->thread_all_list_elem));
     list_append(&thread_all_list, &main_thread->thread_all_list_elem);

@@ -86,6 +86,12 @@ static void general_intr_handler(uint8_t vec_nr) {
             );
         print_string("\n page_fault_vaddr -> ");
         print_int(page_fault_vaddr, 'H');
+        print_string("\n page_vaddr_table -> ");
+        print_int((page_fault_vaddr & 0xffc00000)>>22, 'D');
+        print_string(" ");
+        print_int((page_fault_vaddr & 0x003ff000)>>12, 'D');
+        print_string(" ");
+        print_int((page_fault_vaddr & 0x00000fff), 'H');
     }
     print_string("\n!!!!!!!  interrupt exception occur !!!!!!!!\n");
     // 进入中断处理程序, 处理器会自动将eflags寄存器的IF位置为0, 关中断,
