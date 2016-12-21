@@ -15,8 +15,8 @@ int main(void) {
     print_string("This is uiharu kernel\n");
     init_all();
     /***********  threads  **********/
-    create_thread("k_thread_a", 10, k_thread_a, "misaka ");
-    create_thread("k_thread_b", 8, k_thread_b, "kuroko ");
+    uthread_create("k_thread_a", 10, k_thread_a, "misaka ");
+    uthread_create("k_thread_b", 8, k_thread_b, "kuroko ");
     /***********  threads  **********/
     // intr_enable();
     intr_set_status(INTR_ON);
