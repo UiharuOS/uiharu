@@ -24,6 +24,7 @@ kernel.bin: kernel_main                \
             kernel_kernel              \
             kernel_debug               \
             kernel_device_timer        \
+            kernel_device_terminal     \
             kernel_memory              \
             kernel_thread              \
             kernel_thread_switch       \
@@ -47,7 +48,8 @@ kernel.bin: kernel_main                \
             ${OUT}/thread.o            \
             ${OUT}/dlist.o             \
             ${OUT}/switch.o            \
-            ${OUT}/sync.o
+            ${OUT}/sync.o              \
+            ${OUT}/terminal.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o $<
@@ -81,6 +83,8 @@ kernel_thread_sync: kernel/thread/sync.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/sync.o $<
 kernel_device_timer: kernel/device/timer.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/timer.o $<
+kernel_device_terminal: kernel/device/terminal.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/terminal.o $<
 
 lib_string: lib/string.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/string.o $<
