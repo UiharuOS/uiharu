@@ -131,7 +131,7 @@ void uthread_awake(struct task_struct* thread) {
         }
     }
     // 恢复中断
-    intr_set_status(old_status)
+    intr_set_status(old_status);
 }
 
 static void make_main_thread(void) {

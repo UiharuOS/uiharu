@@ -73,7 +73,7 @@ void lacquire(struct lock* ulock) {
 void lrelease(struct lock* ulock) {
     /* lrelease: 释放锁ulock */
     struct task_struct* current = get_running_thread_pcb();
-    ASSERT(ulock->guard == task_struct);
+    ASSERT(ulock->guard == current);
     if (ulock->guard_repeat_num > 1) {
         ulock->guard_repeat_num--;
         return;
