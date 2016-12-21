@@ -27,6 +27,7 @@ kernel.bin: kernel_main                \
             kernel_memory              \
             kernel_thread              \
             kernel_thread_switch       \
+            kernel_thread_sync         \
             lib_string
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
@@ -46,6 +47,7 @@ kernel.bin: kernel_main                \
             ${OUT}/thread.o            \
             ${OUT}/dlist.o             \
             ${OUT}/switch.o            \
+            ${OUT}/sync.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o $<
@@ -75,6 +77,8 @@ kernel_memory: kernel/memory.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/memory.o $<
 kernel_thread: kernel/thread/thread.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/thread.o $<
+kernel_thread_sync: kernel/thread/sync.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/sync.o $<
 kernel_device_timer: kernel/device/timer.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/timer.o $<
 
