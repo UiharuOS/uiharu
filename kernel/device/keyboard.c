@@ -25,7 +25,7 @@
 #define capslock char_invisible
 /* 控制字符的通码和断码
  * 定义通码即可, 第一套scancodeset: 断码=0x80+通码*/
-#define shift_l_makecode  0x20
+#define shift_l_makecode  0x2a
 #define shift_r_makecode  0x36
 #define alt_l_makecode    0x38
 #define alt_r_makecode    0xe038
@@ -89,16 +89,16 @@ static void intr_keyboard_handler(void) {
     break_code = ((scancode & 0x0080) != 0);
     if (break_code) {
         uint16_t make_code = (scancode &= 0xff7f); // 拿到通码
-        if        (make_code == ctrl_l || make_code == ctrl_r) {
+        if        (make_code == ctrl_l_makecode || make_code == ctrl_r_makecode) {
             ctrl_status = false;  // 按键已经松开了
-        } else if (make_code == shift_l || make_code == shift_r) {
+        } else if (make_code == shift_l_makecode || make_code == shift_r_makecode) {
             shift_status = false;
-        } else if (make_code == alt_l || make_code == alt_r) {
+        } else if (make_code == alt_l_makecode || make_code == alt_r_makecode) {
             alt_status = false;
         } /* capslock松开后不关闭 */
         return;
     } else if ((scancode > 0x00 && scancode < 0x3b) || \
-               (scancode == alt_r) || (scancode == ctrl_r)) { /* 拿到的是通码 */
+               (scancode == alt_r_makecode) || (scancode == ctrl_r_makecode)) { /* 拿到的是通码 */
         boolean shift = false; 
         // 在keyboard map中索引对应字符(是否与shift组合)
         if ((scancode < 0x0e)  || (scancode == 0x29) || \
@@ -127,13 +127,13 @@ static void intr_keyboard_handler(void) {
             return;
         }
 
-        if        (scancode == ctrl_l || scancode == ctrl_r) {
+        if        (scancode == ctrl_l_makecode || scancode == ctrl_r_makecode) {
             ctrl_status = true;
-        } else if (scancode == shift_l || scancode == shift_r) {
+        } else if (scancode == shift_l_makecode || scancode == shift_r_makecode) {
             shift_status = true;
-        } else if (scancode == alt_l || scancode == alt_r) {
+        } else if (scancode == alt_l_makecode || scancode == alt_r_makecode) {
             alt_status = true;
-        } else if (scancode == capslock) {
+        } else if (scancode == capslock_makecode) {
             capslock_status = !capslock_status;
         } else {
             print_string("unknown key\n");
