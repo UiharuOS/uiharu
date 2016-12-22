@@ -9,6 +9,12 @@
 /* 键盘缓冲寄存器端口号 */
 #define KEYBOARD_BUFFER_PORT 0x60
 /* 部分控制字符定义(转义字符) */
+#define esc '\033'
+#define backspace '\b'
+#define tab '\t'
+#define enter '\r'
+#define delete '\177'
+
 #define          char_invisible 0
 #define ctrl_l   char_invisible
 #define ctrl_r   char_invisible
@@ -53,11 +59,11 @@ static char keymap[][2] = {
    /* 0x1e */{'a', 'A'}, /* 0x1f */{'s', 'S'}, /* 0x20 */{'d', 'D'}, /* 0x21 */{'f', 'F'},
    /* 0x22 */{'g', 'G'}, /* 0x23 */{'h', 'H'}, /* 0x24 */{'j', 'J'}, /* 0x25 */{'k', 'K'},
    /* 0x26 */{'l', 'L'}, /* 0x27 */{';', ':'}, /* 0x28 */{'\'', '"'},/* 0x29 */{'`', '~'},
-   /* 0x2a */{shift_l, shift_l}                /* 0x2b */{'\\', '|'},/* 0x2c */{'z', 'Z'},
+   /* 0x2a */{shift_l, shift_l},               /* 0x2b */{'\\', '|'},/* 0x2c */{'z', 'Z'},
    /* 0x2d */{'x', 'X'}, /* 0x2e */{'c', 'C'}, /* 0x2f */{'v', 'V'}, /* 0x30 */{'b', 'B'},
    /* 0x31 */{'n', 'N'}, /* 0x32 */{'m', 'M'}, /* 0x33 */{',', '<'}, /* 0x34 */{'.', '>'},
-   /* 0x35 */{'/', '?'}, /* 0x36 */{shift_r, shift_r}                /* 0x37 */{'*', '*'},
-   /* 0x38 */{alt_l, alt_l}                    /* 0x39 */{' ', ' '}, /* 0x3a */{capslock, capslock}
+   /* 0x35 */{'/', '?'}, /* 0x36 */{shift_r, shift_r},               /* 0x37 */{'*', '*'},
+   /* 0x38 */{alt_l, alt_l},                   /* 0x39 */{' ', ' '}, /* 0x3a */{capslock, capslock}
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* */    
 };
 
@@ -113,7 +119,9 @@ static void intr_keyboard_handler(void) {
             }
         }
         uint8_t index = (scancode &= 0x00ff);  // 拿到通码
-        char current = keymap[index][shift];
+        char current = 0;
+        if (shift) { current = keymap[index][1]; }
+        else       { current = keymap[index][0]; }
         if (current) {
             print_char(current);
             return;
@@ -131,7 +139,6 @@ static void intr_keyboard_handler(void) {
             print_string("unknown key\n");
         }
     }
->>>>>>> 7e3c940598de5dfdb8e952d7f178fd074c81a0ab
 }
 
 void keyboard_init() {
