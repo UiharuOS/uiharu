@@ -3,6 +3,7 @@
 #include "interrupt.h"
 #include "io.h"
 #include "global.h"
+#include "type.h"
 
 /* 键盘缓冲寄存器端口号 */
 #define KEYBOARD_BUFFER_PORT 0x60
@@ -27,9 +28,9 @@
 #define ctrl_r_breakcode  0xe09d  // 扩展0xe0
 #define capslock_makecode 0x3a
 /* 纪录控制字符的按键状态用于组合键 */
-static bool ctrl_status, shift_status, alt_status, capslock_status;
+static boolean ctrl_status, shift_status, alt_status, capslock_status;
 /* 纪录扩展按键(扫描码以0xe0开头) */
-static bool ext_scancode;
+static boolean ext_scancode;
 /* 二维数组映射通码(索引)->Ascii码 */
 static char keymap[][2] = {
 /* -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
@@ -60,9 +61,75 @@ static char keymap[][2] = {
 };
 
 static void intr_keyboard_handler(void) {
-    print_char('k');
-    inb(KEYBOARD_BUFFER_PORT); // 读取输入缓冲寄存器
-    return;
+    boolean ctrl_down_last = ctrl_status;
+    boolean shift_down_last = shift_status;
+    boolean capslock_down_last = capslock_status;
+    boolean break_code;
+    // 读取输入缓冲寄存器
+    uint16_t scancode = inb(KEYBOARD_BUFFER_PORT);
+
+    if (scancode == 0xe0) {
+        // 接受的是扩展扫描码
+        ext_scancode = true;
+        return;  // 扩展扫描码是多字节, 终止当前中断处理, 继续读取下面的scancode
+    }
+    if (ext_scancode) {
+        // 如果上次接受的是扩展scancode前缀, 则合并scancode
+        scancode = ((0xe000) | scancode);
+        ext_scancode = false;
+    }
+    // 拿到断码, 如果发送的是通码(按键还没松开), 则结果为0
+    break_code = ((scancode & 0x0080) != 0);
+    if (break_code) {
+        uint16_t make_code = (scancode &= 0xff7f); // 拿到通码
+        if        (make_code == ctrl_l || make_code == ctrl_r) {
+            ctrl_status = false;  // 按键已经松开了
+        } else if (make_code == shift_l || make_code == shift_r) {
+            shift_status = false;
+        } else if (make_code == alt_l || make_code == alt_r) {
+            alt_status = false;
+        } /* capslock松开后不关闭 */
+        return;
+    } else if ((scancode > 0x00 && scancode < 0x3b) || \
+               (scancode == alt_r) || (scancode == ctrl_r)) { /* 拿到的是通码 */
+        boolean shift = false; 
+        // 在keyboard map中索引对应字符(是否与shift组合)
+        if ((scancode < 0x0e)  || (scancode == 0x29) || \
+            (scancode == 0x1a) || (scancode == 0x1b) || \
+            (scancode == 0x2b) || (scancode == 0x27) || \
+            (scancode == 0x28) || (scancode == 0x33) || \
+            (scancode == 0x34) || (scancode == 0x35)  ) {
+            if (shift_down_last) {
+                shift = true;  // 同时按下shift键
+            }
+        } else { /* 字母键 */
+            if        (shift_down_last && capslock_down_last) {
+                shift = false;
+            } else if (shift_down_last || capslock_down_last) {
+                shift = true;
+            } else {
+                shift = false;
+            }
+        }
+        uint8_t index = (scancode &= 0x00ff);  // 拿到通码
+        char current = keymap[index][shift];
+        if (current) {
+            print_char(current);
+            return;
+        }
+
+        if        (scancode == ctrl_l || scancode == ctrl_r) {
+            ctrl_status = true;
+        } else if (scancode == shift_l || scancode == shift_r) {
+            shift_status = true;
+        } else if (scancode == alt_l || scancode == alt_r) {
+            alt_status = true;
+        } else if (scancode == capslock) {
+            capslock_status = !capslock_status;
+        } else {
+            print_string("unknown key\n");
+        }
+    }
 }
 
 void keyboard_init() {
