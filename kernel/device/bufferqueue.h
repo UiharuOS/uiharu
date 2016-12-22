@@ -9,7 +9,7 @@
 #define buffer_size 64
 
 struct bufferqueue {
-    struct lock buffer_lock;
+    struct lock lock;
     char buffer[buffer_size];
     int32_t head;
     int32_t tail;

@@ -1,11 +1,12 @@
 #include "bufferqueue.h"
 #include "interrupt.h"
 #include "sync.h"
+#include "debug.h"
 
 void bufferqueue_init(struct bufferqueue* bufq) {
     lock_init(&bufq->lock);
     bufq->current_producer = bufq->current_consumer = NULL;
-    bufq->head->tail = 0;
+    bufq->head = bufq->tail = 0;
 }
 
 int32_t next_pos(int32_t pos) {
@@ -37,7 +38,7 @@ char bufferqueue_getchar(struct bufferqueue* bufq) {
     while (bufferqueue_empty(bufq)) {
         lacquire(&bufq->lock);
         bufferqueue_sleep(&bufq->current_consumer);
-        lrelease(&bufq->lock)
+        lrelease(&bufq->lock);
     }
     char byte = bufq->buffer[bufq->tail];
     bufq->tail = next_pos(bufq->tail);
@@ -52,7 +53,7 @@ void  bufferqueue_putchar(struct bufferqueue* bufq, char byte) {
     while (bufferqueue_full(bufq)) {
         lacquire(&bufq->lock);
         bufferqueue_sleep(&bufq->current_producer);
-        lrelease(&bufq->lock)
+        lrelease(&bufq->lock);
     }
     bufq->buffer[bufq->head] = byte;
     bufq->head = next_pos(bufq->head);

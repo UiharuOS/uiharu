@@ -169,7 +169,7 @@ static void pic_init(void) {
     // outb (PIC_M_DATA, 0xfe);
     // outb (PIC_S_DATA, 0xff);
     // 测试键盘中断, 屏蔽其他中断
-    outb(PIC_M_DATA, 0xfd);
+    outb(PIC_M_DATA, 0xfc);
     outb(PIC_S_DATA, 0xff);
 
     print_string("Info)--> pic init done!\n");
