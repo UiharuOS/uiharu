@@ -5,6 +5,10 @@
 #include "global.h"
 #include "stdint.h"
 #include "type.h"
+#include "bufferqueue.h"
+
+/* 定义键盘输入环形缓冲区 */
+struct bufferqueue keyboard_buf;
 
 /* 键盘缓冲寄存器端口号 */
 #define KEYBOARD_BUFFER_PORT 0x60
@@ -14,7 +18,7 @@
 #define tab '\t'
 #define enter '\r'
 #define delete '\177'
-
+/* 不可见字符定义 */
 #define          char_invisible 0
 #define ctrl_l   char_invisible
 #define ctrl_r   char_invisible
@@ -123,7 +127,10 @@ static void intr_keyboard_handler(void) {
         if (shift) { current = keymap[index][1]; }
         else       { current = keymap[index][0]; }
         if (current) {
-            print_char(current);
+            if (!bufferqueue_full(&keyboard_buf)) {
+                print_char(current);
+                bufferqueue_putchar(&keyboard_buf, current);
+            }
             return;
         }
 
@@ -143,6 +150,7 @@ static void intr_keyboard_handler(void) {
 
 void keyboard_init() {
     print_string("Info)--> keyboard_init start\n");
+    bufferqueue_init(&keyboard_buf);
     register_handler(0x21, intr_keyboard_handler);
     print_string("Info)--> keyboard_init done\n");
 }
