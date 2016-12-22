@@ -24,10 +24,6 @@ struct gate_desc {
     uint16_t func_offset_high_word; // 中断处理程序在目标代码段内的偏移量的31~16位
 };
 
-char* intr_name[IDT_DESC_CNT];         // 保存异常[名字](你的名字把uiharu写完看)
-void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function);
-// static 函数
-static struct gate_desc idt[IDT_DESC_CNT];
 // extern 外部对象声明
 extern intr_handler intr_entry_table[IDT_DESC_CNT];
 
@@ -62,7 +58,7 @@ static void general_intr_handler(uint8_t vec_nr) {
      */
     if(vec_nr == 0x27 || vec_nr == 0x2f) {
         // IRQ7 和 IRQ15 会产生伪中断, 无需处理
-        // 伪中断(spurious interrupt) 
+        // 伪中断(spurious interrupt)
         return;
     }
     // 在屏幕左上角打印中断异常
@@ -179,8 +175,11 @@ static void pic_init(void) {
 
     // 打开主片上IR0, 接受时钟产生的中断
     // 此时向8259A发送的命令操作属于OCW
-    outb (PIC_M_DATA, 0xfe);
-    outb (PIC_S_DATA, 0xff);
+    // outb (PIC_M_DATA, 0xfe);
+    // outb (PIC_S_DATA, 0xff);
+    // 测试键盘中断, 屏蔽其他中断
+    outb(PIC_M_DATA, 0xfd);
+    outb(PIC_S_DATA, 0xff);
 
     print_string("Info)--> pic init done!\n");
 }

@@ -10,6 +10,7 @@
 #include "memory.h"
 #include "thread.h"
 #include "terminal.h"
+#include "keyboard.h"
 
 void init_all(void) {
     /* init_all: 初始化所有模块
@@ -20,5 +21,6 @@ void init_all(void) {
     thread_init();   // 初始化线程调度
     timer_init();    // 初始化8253PIC, 提高时钟中断频率(100HZ/S)
     terminal_init(); // 初始化终端设备
+    keyboard_init(); // 初始化键盘驱动
     print_string("Info)-> init done\n");
 }
