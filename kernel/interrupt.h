@@ -4,6 +4,15 @@
 #include "stdint.h"
 #define IDT_DESC_CNT 0x30  // 目前总共支持0x21(33)个中断向量
 
+struct gate_desc {
+    // 中断门描述符结构体
+    uint16_t func_offset_low_word;  // 中断处理程序在目标代码段中的偏移量的15~0位
+    uint16_t selector;              // 中断处理程序目标代码段描述符选择子
+    uint8_t dcount;                 // 未使用以及固定为0的字段
+    uint8_t attribute;              // 属性位(TYPE, S, DPL, P)
+    uint16_t func_offset_high_word; // 中断处理程序在目标代码段内的偏移量的31~16位
+};
+
 void idt_init(void);
 typedef void* intr_handler;
 // 定义中断的两种状态
