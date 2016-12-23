@@ -1,6 +1,9 @@
-#include "memory.c"
 #include "global.h"
 #include "print.h"
+#include "thread.h"
+#include "string.h"
+
+#define PG_SIZE 4096
 
 /* Task State Segment结构
  * -- TSS是硬件(inter)要求的,程序员提供
@@ -74,16 +77,16 @@ void tss_init() {
     memset(&tss, 0, tss_size); // 将tss描述符表所在的内存初始化清0
     tss.ss0 = SELECTOR_K_STACK;
     tss.io_base = tss_size;
-    *((struct gdt_desc*)0xc0000920) = make_gdt_desc(\
-            (uint32_t*)&tss,        \
-            tss_size - 1,           \
-            TSS_ATTR_LOW,           \
-            TSS_ATTR_HIGH,          \);
-    *((struct gdt_desc*)0xc0000928) = make_gdt_desc(\
-            (uint32_t*)0,           \
-            0xfffff,                \
-            GDT_DATA_ATTR_LOW_DPL3, \
-            GDT_ATTR_HIGH           \);
+    *((struct gdt_desc*)0xc0000920) = make_gdt_desc(
+            (uint32_t*)&tss,
+            tss_size - 1,
+            TSS_ATTR_LOW,
+            TSS_ATTR_HIGH);
+    *((struct gdt_desc*)0xc0000928) = make_gdt_desc(
+            (uint32_t*)0,
+            0xfffff,
+            GDT_DATA_ATTR_LOW_DPL3,
+            GDT_ATTR_HIGH);
     // lgdt: 16为表界限&32位表的起始地址
     // 8*7(个描述符)-1 | 64位32位地址
     uint64_t gdt_operand = ((8*7-1) | ((uint64_t)(uint32_t)0xc0000900 << 16));

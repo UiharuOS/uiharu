@@ -8,7 +8,7 @@ KERNEL_ADDR = 0xc0001500
 Ttext = -Ttext $(KERNEL_ADDR)
 LIBCFLAGS = -I $(LIBINCLUDE) -m32
 CFLAGS = $(INCLUDE) -m32 -fno-builtin
-INCLUDE = -Ilib/ -Ikernel/ -Ikernel/lib/ -Ikernel/device/ -Ikernel/thread/ -Iacademy-city/
+INCLUDE = -Ilib/ -Ikernel/ -Ikernel/lib/ -Ikernel/device/ -Ikernel/thread/ -Iacademy_city/
 
 all: kernel.bin
 
@@ -31,7 +31,8 @@ kernel.bin: kernel_main                \
             kernel_thread              \
             kernel_thread_switch       \
             kernel_thread_sync         \
-            lib_string
+            lib_string                 \
+            user_tss
 	ld -m elf_i386 $(Ttext) -e main -o \
             ${OUT}/kernel.bin          \
             ${OUT}/main.o              \
@@ -53,7 +54,8 @@ kernel.bin: kernel_main                \
             ${OUT}/sync.o              \
             ${OUT}/terminal.o          \
             ${OUT}/keyboard.o          \
-            ${OUT}/bufferqueue.o
+            ${OUT}/bufferqueue.o       \
+            ${OUT}/tss.o
 
 kernel_main: kernel/main.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/main.o $<
@@ -93,6 +95,8 @@ kernel_device_keyboard: kernel/device/keyboard.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/keyboard.o $<
 kernel_device_bufferq: kernel/device/bufferqueue.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/bufferqueue.o $<
+user_tss: academy_city/tss.c
+	$(CC) $(CFLAGS) -c -o ${OUT}/tss.o $<
 
 lib_string: lib/string.c
 	$(CC) $(CFLAGS) -c -o ${OUT}/string.o $<
