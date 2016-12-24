@@ -6,6 +6,12 @@ static inline void outb(uint16_t port, uint8_t data) {
     /* outb: 向端口port写入一个字节
      *   port: 指定端口寄存器
      *   data: 待写入的一个字节数据
+     *   => inline: 建议编译器将函数编译为内嵌的方式,
+     *      就是将所调用函数体的内容在调用处展开, 由call调用变成顺序执行
+     *      减少了call函数调用时的上下文保护, 不过体积变大
+     *   -> b: QImode (a-d)l; w: HImode (a-d)x
+     *   -> a: eax, ax, al ; N:立即数约束(0~255); d edx, dx, dl
+     *   => outb %al, %dx
      */
     asm volatile ("outb %b0, %w1"
         :
@@ -18,6 +24,11 @@ static inline void outsw(uint16_t port, const void* addr, uint32_t word_cnt) {
      *   port: 端口寄存器
      *   addr: 起始内存地址
      *   word_cnt: 待复制的内存大小
+     *   => cld ; clean direction, 向上扩展
+     *   => rep outsw ; outsw:
+     *      Output word from memory location specified in DS:(E)SI
+     *      to I/O port specified in DX
+     *   -> +: 可读写, 约束的内存(寄存器)->先被读入再被写入
      */
     asm volatile ("cld; rep outsw"
         : "+S" (addr), "+c" (word_cnt)
@@ -28,11 +39,12 @@ static inline void outsw(uint16_t port, const void* addr, uint32_t word_cnt) {
 static inline uint8_t inb(uint16_t port) {
     /* inb: 从指定的端口寄存器中读出一个字节的数据
      *   port: 指定的端口寄存器
+     *   => inb %dx, $data
      */
     uint8_t data;
     asm volatile ("inb %w1, %b0"
         : "=a" (data)
-        : "Nd" (port)
+        : "d" (port)
     );
     return data;
 }

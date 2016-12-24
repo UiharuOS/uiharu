@@ -10,15 +10,15 @@
  * -- CPU使用TSS做任务切换
  */
 struct tss {
-    uint32_t backlink;
-    uint32_t* esp0;
+    uint32_t backlink;  // 指向上一个tss任务的指针,和eflags的NT配合用于任务嵌套
+    uint32_t* esp0;     // 0级内核栈指针, 也就是运行中的线程的内核栈
     uint32_t ss0;
     uint32_t* esp1;
     uint32_t ss1;
     uint32_t* esp2;
     uint32_t ss2;
     uint32_t cr3;
-    uint32_t (*eip) (void);
+    uint32_t (*eip) (void); // 指向下一条待运行的指令,通过更改eip可以实现更改执行流
     uint32_t eflags;
     uint32_t eax;
     uint32_t ecx;
@@ -36,7 +36,7 @@ struct tss {
     uint32_t gs;
     uint32_t ldt;
     uint32_t trace;
-    uint32_t io_base;
+    uint32_t io_base;  // io位图
 };
 
 static struct tss tss;  // 交给CPU用的tss
