@@ -76,7 +76,7 @@ void tss_init() {
     uint32_t tss_size = sizeof(tss);
     memset(&tss, 0, tss_size); // 将tss描述符表所在的内存初始化清0
     tss.ss0 = SELECTOR_K_STACK;
-    tss.io_base = tss_size;
+    tss.io_base = tss_size; // tss中不存在I/O位图
     *((struct gdt_desc*)0xc0000920) = make_gdt_desc(
             (uint32_t*)&tss,
             tss_size - 1,

@@ -8,6 +8,7 @@
 
 #include "stdint.h"
 #include "bitmap.h"
+#include "sync.h"
 
 // 定义属性位用于页表修改
 #define PG_P_1   1  // 页表项或页目录项存在的属性位, 存在
@@ -27,6 +28,7 @@ struct virtual_addr {
 
 /* 物理内存地址池 */
 struct pool {
+    struct lock lock;            // 申请内存时互斥
     struct bitmap pool_bitmap;   // 物理地址池位图
     uint32_t phy_addr_start;     // 物理地址起始地址
     uint32_t pool_size;          // 该内存池的字节容量

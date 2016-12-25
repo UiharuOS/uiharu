@@ -65,6 +65,7 @@ struct task_struct {
     struct list_entry thread_elem;
     struct list_entry thread_all_list_elem;
     uint32_t* pgdir;
+    struct virtual_addr user_vaddr;  // 用户进程的虚拟地址池
     uint32_t stack_magic;
 };
 

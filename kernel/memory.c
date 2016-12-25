@@ -10,6 +10,7 @@
 #include "global.h"
 #include "debug.h"
 #include "string.h"
+#include "type.h"
 
 /* 每页规划为4KB */
 #define PG_SIZE 4096
@@ -37,6 +38,8 @@ static void mem_pool_init(uint32_t all_mem) {
      *   总容量已经在loader中获取了, 存储在total_mem_bytes(32位大小地址0xb00)中
      */
     print_string("Info)--> mem_pool_init start\n");
+    lock_init(&kernel_pool.lock);
+    lock_init(&user_pool.lock);
     // 总共初始化了256个页表
     // 分布在物理内存低端1MB以上, "第1个"页表是页目录表(4KB, 第1023个页目录项指向于此)
     uint32_t page_table_size = PG_SIZE * 256;
@@ -118,6 +121,19 @@ static void* vaddr_get(enum pool_flags pf, uint32_t pg_cnt) {
         vaddr_start = kernel_vaddr.vaddr_start + bit_idx_start*PG_SIZE;
     } else {
         /* 此处留给学园都市(用户空间) */
+        struct task_struct* current = get_running_thread_pcb();
+        bit_idx_start = bitmap_scan(&current->user_vaddr.vaddr_bitmap, pg_cnt);
+        if (bit_idx_start == -1) {
+            return NULL;
+        }
+        while (cnt < pg_cnt) {
+            bitmap_set(&current->user_vaddr.vaddr_bitmap, bit_idx_start, 1);
+            cnt++;
+        }
+        // 位图索引 ==> 起始虚拟地址
+        vaddr_start = current->user_vaddr.vaddr_start + bit_idx_start*PG_SIZE;
+        // 用户运行环境需要在虚拟地址3GB以下(不能越界内核)
+        ASSERT((uint32_t)vaddr_start < (0xc0000000-PG_SIZE));
     }
     return (void*)vaddr_start;
 }
@@ -135,9 +151,7 @@ uint32_t* pte_ptr(uint32_t vaddr) {
 uint32_t* pde_ptr(uint32_t vaddr) {
     /* pde_ptr: 得到虚拟地址vaddr对应的pde指针 */
     uint32_t* pde = (uint32_t*)((0xfffff000)+PDE_IDX(vaddr)*4);
-    return pde; // pde是指向虚拟地址
-                // -- (高20位全是1, 后12位是vaddr高10位左移2位)
-                // 的指针
+    return pde;
 }
 
 static void* palloc(struct pool* m_pool) {
@@ -160,6 +174,7 @@ static void page_table_add(void* vaddr, void* page_phyaddr) {
     uint32_t* pde = pde_ptr(_vaddr);
     uint32_t* pte = pte_ptr(_vaddr);
 
+    // 利用了PG_P_1判断该页是否在内存中
     if (*pde & 0x00000001) { // 该虚拟地址查找到的页目录项存在(页表存在)
         if (!(*pte & 0x00000001)) {
             // 该虚拟地址查找到的页表项不存在(物理页不存在, 还没有被分配)
@@ -214,3 +229,46 @@ void* get_kernel_pages(uint32_t pg_cnt) {
     }
     return vaddr;
 }
+
+void* get_user_pages(uint32_t pg_cnt) {
+    /* get_user_pages: 从用户物理内存池中申请pg_cnt页内存*/
+    lacquire(&user_pool.lock);
+    void* vaddr = malloc_page(PF_USER, pg_cnt);
+    memset(vaddr, 0, pg_cnt*PG_SIZE);  //  清零
+    lrelease(&user_pool.lock);
+    return vaddr;
+}
+
+void* get_a_page(enum pool_flags pf, uint32_t vaddr) {
+    struct pool* mem_pool = pf & PF_KERNEL ? &kernel_pool : &user_pool;
+    lacquire(&mem_pool->lock);
+    struct task_struct* current = get_running_thread_pcb();
+    int32_t bit_idx = -1;
+    if (current->pgdir != NULL && pf == PF_USER) {
+        bit_idx = (vaddr-current->user_vaddr.vaddr_start) / PG_SIZE;
+        ASSERT(bit_idx > 0);
+        bitmap_set(&current->user_vaddr.vaddr_bitmap, bit_idx, 1);
+    } else if (current->pgdir == NULL && pf == PF_KERNEL) {
+        bit_idx = (vaddr-kernel_vaddr.vaddr_start) / PG_SIZE;
+        ASSERT(bit_idx > 0);
+        bitmap_set(&kernel_vaddr.vaddr_bitmap, bit_idx, 1);
+    } else {
+        DEBUGGER("get_a_page: not allow kernel alloc userspace or user alloc kernelspace");
+    }
+    void* page_phyaddr = palloc(mem_pool);
+    if (page_phyaddr == NULL) { return NULL; }
+    page_table_add((void*)vaddr, page_phyaddr);
+    lrelease(&mem_pool->lock);
+    return (void*)vaddr;
+}
+
+uint32_t vaddr2phy(uint32_t vaddr) {
+    /* virtual address to physical address */
+    uint32_t* pte = pte_ptr(vaddr);
+    return ((*pte & 0xfffff000) + (vaddr & 0x00000fff));
+}
+
+/*
+ *  uint32_t* a = new(uint32_t);  // 1, 4*1024 <- bitmap
+ *  delete(a); a=NULL;
+ */
