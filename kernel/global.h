@@ -1,6 +1,7 @@
 #ifndef _FUCK_CCNU
 #define _FUCK_CCNU
 #include "stdint.h"
+#include "type.h"
 
 /* 请求特权级定义 */
 #define RPL0 0
@@ -50,7 +51,7 @@
 /* TSS描述符属性 */
 #define TSS_DESC_D 0
 
-/* GET描述符定义 */
+/* GDT描述符定义 */
 #define GDT_ATTR_HIGH ((DESC_G_4K<<7)+(DESC_D_32<<6)+(DESC_L<<5)+(DESC_AVL<<4))
 #define GDT_CODE_ATTR_LOW_DPL3 ((DESC_P<<7)+(DESC_DPL_3<<5)+(DESC_S_CODE<<4)+(DESC_TYPE_CODE))
 #define GDT_DATA_ATTR_LOW_DPL3 ((DESC_P<<7)+(DESC_DPL_3<<5)+(DESC_S_DATA<<4)+(DESC_TYPE_DATA))
@@ -72,5 +73,16 @@ struct gdt_desc {
     uint8_t limit_high_attr_high;
     uint8_t base_high_byte;
 };
+
+#define EFLAGS_MBS      (1 << 1)
+#define EFLAGS_IF_1     (1 << 9)
+#define EFLAGS_IF_0      0
+#define EFLAGS_IOPL_3   (3 << 12)
+#define EFLAGS_IOPL_0    0
+#define DIV_ROUND_UP(X, STEP) ((X + STEP - 1) / (STEP))
+#define bool 1
+#define true 1
+#define false 0
+#define PG_SIZE 4096
 
 #endif
