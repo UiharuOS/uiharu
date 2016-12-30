@@ -3,6 +3,7 @@
 #include "print.h"
 #include "memory.h"
 #include "debug.h"
+#include "userproc.h"
 
 # 引用kernel.S中的中断退出函数
 extern void intr_exit(void);

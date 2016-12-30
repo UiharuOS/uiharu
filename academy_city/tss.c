@@ -39,7 +39,7 @@ struct tss {
     uint32_t io_base;  // io位图
 };
 
-static struct tss tss;  // 交给CPU用的tss
+static struct tss tss;  // 交给CPU用的tss,只有这一个tss哦:)
 
 void update_tss_esp(struct task_struct* thread) {
     /* 更新tss的esp0属性为thread的0级栈
